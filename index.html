@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lupa</title>
+<meta name="description" content="Lupa: Sammle die Säugetiere Deutschlands. Sichtungen mit Datum, Ort und Fotos.">
+<meta name="theme-color" content="#f2f5f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c110e" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lupa">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@1,6..72,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: collector's app. Dark hero card with a ring of eight order colors, colored order cards, badge shelf,
+   photo album grid, bottom sheets for species/capture, fixed tab bar. Each order owns one bold color. */
+:root {
+  --bg: #f2f5f3;
+  --surface: #ffffff;
+  --surface-2: #e8eeea;
+  --ink: #121a16;
+  --muted: #5d6a63;
+  --line: #dbe2dd;
+  --accent: #17924f;
+  --accent-ink: #ffffff;
+  --hero: #13201a;
+  --hero-ink: #f2f7f3;
+  --hero-muted: #9fb3a7;
+  --ex: #9b6864;
+  --example: #a77f0c;
+  --danger: #c0392b;
+  --rl-1: #c0392b;
+  --rl-2: #d0612a;
+  --rl-3: #b07a12;
+  --c-erinaceomorpha: #b07a12;
+  --c-soricomorpha: #7d4e9e;
+  --c-chiroptera: #3d4db0;
+  --c-lagomorpha: #d0612a;
+  --c-rodentia: #2a8a7c;
+  --c-carnivora: #c73e4a;
+  --c-ungulata: #4b8a2c;
+  --c-cetacea: #1f7bb8;
+  --scrim: rgba(8, 14, 10, .5);
+  --shadow: 0 12px 32px rgba(18, 26, 22, .16);
+  --f-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-latin: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-data: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --nav-h: 64px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c110e; --surface: #151c18; --surface-2: #1e2722; --ink: #e8eeea; --muted: #95a39b; --line: #26302b;
+    --accent: #3cc27a; --accent-ink: #06140c; --hero: #18241e; --hero-ink: #f2f7f3; --hero-muted: #9fb3a7;
+    --ex: #c4918c; --example: #e2bf55; --danger: #ec7a66; --rl-1: #ef7c69; --rl-2: #ef9b5e; --rl-3: #e2bf55;
+    --c-erinaceomorpha: #c08a1e; --c-soricomorpha: #9363b5; --c-chiroptera: #5868cc; --c-lagomorpha: #e07238;
+    --c-rodentia: #2f9d8d; --c-carnivora: #d9505c; --c-ungulata: #5a9e37; --c-cetacea: #2b8fd0;
+    --scrim: rgba(0, 0, 0, .62); --shadow: 0 12px 32px rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c110e; --surface: #151c18; --surface-2: #1e2722; --ink: #e8eeea; --muted: #95a39b; --line: #26302b;
+  --accent: #3cc27a; --accent-ink: #06140c; --hero: #18241e; --hero-ink: #f2f7f3; --hero-muted: #9fb3a7;
+  --ex: #c4918c; --example: #e2bf55; --danger: #ec7a66; --rl-1: #ef7c69; --rl-2: #ef9b5e; --rl-3: #e2bf55;
+  --c-erinaceomorpha: #c08a1e; --c-soricomorpha: #9363b5; --c-chiroptera: #5868cc; --c-lagomorpha: #e07238;
+  --c-rodentia: #2f9d8d; --c-carnivora: #d9505c; --c-ungulata: #5a9e37; --c-cetacea: #2b8fd0;
+  --scrim: rgba(0, 0, 0, .62); --shadow: 0 12px 32px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r);
+  padding-block: 0 calc(var(--nav-h) + 28px + env(safe-area-inset-bottom, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.app { max-width: 540px; margin: 0 auto; }
+.latin { font-family: var(--f-latin); font-style: italic; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+.label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.press { transition: transform .12s ease; }
+.press:active { transform: scale(.97); }
+
+/* Header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 14px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { font-family: var(--f-display); font-weight: 800; font-size: 24px; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; }
+.brand .logo { width: 32px; height: 32px; flex: none; }
+.scope { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--line); padding: 4px 10px; border-radius: 99px; }
+
+.banner { display: flex; gap: 12px; align-items: center; justify-content: space-between; border: 1.5px dashed var(--example); border-radius: 14px; padding: 10px 12px; margin-block: 2px 14px; font-size: 13px; }
+.banner button { font-weight: 700; color: var(--example); white-space: nowrap; }
+
+section { margin-top: 28px; }
+.sh { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0 0 12px; }
+.sh h2 { font-family: var(--f-display); font-weight: 800; font-size: 21px; letter-spacing: -.01em; margin: 0; }
+.sh small, .sh button { font-size: 13px; color: var(--muted); font-weight: 600; }
+.sh button { color: var(--accent); }
+
+/* Hero */
+.hero { background: var(--hero); color: var(--hero-ink); border-radius: 26px; padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; position: relative; overflow: hidden; }
+.ring { position: relative; width: 148px; height: 148px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .mid { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.ring .big { font-family: var(--f-display); font-weight: 800; font-size: 50px; line-height: .9; letter-spacing: -.03em; }
+.ring .of { font-family: var(--f-data); font-size: 12px; color: var(--hero-muted); margin-top: 4px; }
+.hero h1 { font-family: var(--f-display); font-weight: 700; font-size: 20px; line-height: 1.15; margin: 0 0 4px; text-wrap: balance; }
+.hero .pct { font-family: var(--f-display); font-weight: 800; font-size: 34px; letter-spacing: -.02em; color: var(--hero-ink); line-height: 1; }
+.hero .pct small { font-size: 15px; font-weight: 600; color: var(--hero-muted); margin-left: 4px; letter-spacing: 0; }
+.stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.stat { background: rgba(255,255,255,.07); border-radius: 14px; padding: 10px 12px; min-width: 0; text-align: left; }
+.stat b { display: block; font-family: var(--f-display); font-weight: 800; font-size: 22px; line-height: 1.1; }
+.stat span { font-size: 12px; color: var(--hero-muted); }
+.stat.ex b { color: #e3b2ad; }
+@media (max-width: 370px) { .hero { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+
+/* Badges */
+.shelf { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter-l)) calc(-1 * var(--gutter-r)); padding: 2px var(--gutter-r) 6px var(--gutter-l); }
+.shelf::-webkit-scrollbar { display: none; }
+.badge { flex: none; width: 84px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.medal { width: 68px; height: 68px; border-radius: 50%; display: grid; place-items: center; position: relative; color: #fff; background: var(--bc, var(--accent)); box-shadow: inset 0 -4px 0 rgba(0,0,0,.18), 0 4px 10px rgba(0,0,0,.12); }
+.medal::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; border: 2px dashed rgba(255,255,255,.45); }
+.medal .g { font-family: var(--f-display); font-weight: 800; font-size: 22px; letter-spacing: -.02em; }
+.medal .g.sm { font-size: 17px; }
+.medal svg.sil { width: 46px; height: auto; }
+.medal svg.sil .sil-line { stroke: none; }
+.medal svg.sil .sil-empty, .medal svg.sil .sil-fill { fill: #fff; }
+.medal svg.sil .sil-ground { stroke: none; }
+.medal svg.ic { width: 28px; height: 28px; }
+.badge.locked .medal { background: var(--surface-2); color: var(--muted); box-shadow: none; }
+.badge.locked .medal::after { border-color: var(--line); }
+.badge.locked .medal svg.sil .sil-empty, .badge.locked .medal svg.sil .sil-fill { fill: var(--muted); opacity: .45; }
+.badge .bn { font-size: 12px; font-weight: 700; line-height: 1.2; }
+.badge .bp { font-family: var(--f-data); font-size: 11px; color: var(--muted); }
+.badge .bar { width: 56px; height: 4px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.badge .bar i { display: block; height: 100%; background: var(--bc, var(--accent)); }
+
+/* Order cards */
+.ocards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ocard { background: var(--oc); color: #fff; border-radius: 20px; padding: 12px 12px 14px; text-align: left; display: flex; flex-direction: column; gap: 6px; min-width: 0; position: relative; }
+.ocard svg { width: 100%; height: auto; aspect-ratio: 120 / 80; max-width: 100%; display: block; }
+.ocard .sil-line { stroke: rgba(255,255,255,.9); stroke-width: 2.4; fill: none; opacity: 1; stroke-linejoin: round; }
+.ocard .sil-empty { fill: rgba(255,255,255,.16); }
+.ocard .sil-fill { fill: #fff; }
+.ocard .sil-ground { stroke: rgba(255,255,255,.35); stroke-width: 1.5; }
+.ocard .orow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 6px; }
+.ocard .oname { font-family: var(--f-display); font-weight: 700; font-size: 16px; line-height: 1.1; min-width: 0; }
+.ocard .ocount { font-family: var(--f-data); font-size: 12px; font-weight: 600; opacity: .9; white-space: nowrap; }
+.ocard .odots { display: flex; flex-wrap: wrap; gap: 3px; }
+.ocard .odots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.28); }
+.ocard .odots i.on { background: #fff; }
+.ocard .odots i.ex { background: transparent; border: 1px dashed rgba(255,255,255,.6); }
+.ocard .odots i.ex.on { background: #e3b2ad; border: 0; }
+.ocard .done { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; background: #fff; color: var(--oc); padding: 2px 7px; border-radius: 99px; }
+
+/* Recent cards */
+.recent { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter-l)) calc(-1 * var(--gutter-r)); padding: 2px var(--gutter-r) 4px var(--gutter-l); }
+.recent::-webkit-scrollbar { display: none; }
+.rcard { flex: none; width: 148px; background: var(--surface); border-radius: 18px; overflow: hidden; text-align: left; border: 1px solid var(--line); }
+.rcard .rph { aspect-ratio: 1; position: relative; background: var(--surface-2); }
+.rcard .rph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.rcard .rph .own { position: absolute; left: 8px; bottom: 8px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,.6); color: #fff; padding: 2px 7px; border-radius: 99px; }
+.rcard .rb { padding: 8px 10px 10px; border-top: 4px solid var(--oc); }
+.rcard strong { display: block; font-size: 14px; line-height: 1.2; }
+.rcard span { font-size: 12px; color: var(--muted); }
+
+.empty { padding: 24px 16px; text-align: center; color: var(--muted); font-size: 14px; background: var(--surface); border: 1.5px dashed var(--line); border-radius: 18px; }
+.foot { margin-top: 30px; font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 6px; }
+.foot button { text-decoration: underline; text-underline-offset: 2px; text-align: left; }
+
+/* Tags & RL */
+.tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--example); border: 1px solid var(--example); border-radius: 5px; padding: 0 4px; margin-left: 6px; vertical-align: 2px; }
+.tag.ex { color: var(--ex); border-color: var(--ex); }
+.tag.new { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.rl { display: inline-flex; align-items: center; font-family: var(--f-data); font-size: 10.5px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 6px; background: var(--surface); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.rl[data-rl="1"] { background: var(--rl-1); border-color: var(--rl-1); color: #fff; }
+.rl[data-rl="2"] { background: var(--rl-2); border-color: var(--rl-2); color: #fff; }
+.rl[data-rl="3"] { background: var(--rl-3); border-color: var(--rl-3); color: #fff; }
+.rl[data-rl="0"] { background: var(--ex); border-color: var(--ex); color: #fff; }
+.rl[data-rl="*"] { color: var(--accent); border-color: var(--accent); }
+
+/* Species album */
+.search { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 56px); z-index: 4; background: var(--bg); padding-block: 2px 10px; display: flex; flex-direction: column; gap: 8px; }
+.search input { width: 100%; font: inherit; font-size: 16px; padding: 12px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); }
+.search input:focus { outline: none; border-color: var(--accent); }
+.hscroll { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--gutter-l)) calc(-1 * var(--gutter-r)); padding-inline: var(--gutter-l) var(--gutter-r); }
+.hscroll::-webkit-scrollbar { display: none; }
+.chip { flex: none; font-size: 13px; font-weight: 600; padding: 6px 13px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--surface); display: inline-flex; align-items: center; gap: 6px; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip .sw { width: 10px; height: 10px; border-radius: 50%; background: var(--oc); }
+.chip.o[aria-pressed="true"] { background: var(--oc); border-color: var(--oc); color: #fff; }
+.chip.o[aria-pressed="true"] .sw { background: #fff; }
+.chip .n { font-family: var(--f-data); font-size: 11px; opacity: .75; }
+.group { margin-top: 20px; }
+.ghead { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.ghead .gt { display: inline-flex; align-items: center; gap: 8px; background: var(--oc); color: #fff; font-family: var(--f-display); font-weight: 700; font-size: 15px; padding: 5px 12px 5px 6px; border-radius: 99px; }
+.ghead .gt svg { width: 30px; height: 20px; }
+.ghead .gt .sil-line { stroke: none; } .ghead .gt .sil-ground { stroke: none; }
+.ghead .gt .sil-empty, .ghead .gt .sil-fill { fill: #fff; }
+.ghead .gc { font-family: var(--f-data); font-size: 12px; color: var(--muted); }
+.ghead .gbar { flex: 1; height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.ghead .gbar i { display: block; height: 100%; background: var(--oc); border-radius: 99px; }
+.album { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 480px) { .album { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { text-align: left; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.tile .tp { aspect-ratio: 1; max-width: 100%; border-radius: 16px; overflow: hidden; position: relative; background: var(--surface-2); display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 26px; color: var(--muted); }
+.tile .tp img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(.85); transition: filter .3s; }
+.tile:not(.seen) .tp::after { content: ""; position: absolute; inset: 0; background: var(--bg); opacity: .42; z-index: 1; }
+.tile .tp .rl, .tile .ck, .tile .cnt { z-index: 2; }
+.tile.seen .tp { box-shadow: 0 0 0 3px var(--oc); }
+.tile.seen .tp img { filter: none; }
+.tile.ex .tp { outline: 2px dashed var(--ex); outline-offset: -2px; }
+.tile.ex.seen .tp { box-shadow: 0 0 0 3px var(--ex); outline: 0; }
+.tile .ck { position: absolute; right: 6px; bottom: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--oc); color: #fff; display: grid; place-items: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.tile.ex .ck { background: var(--ex); }
+.tile .ck svg { width: 14px; height: 14px; }
+.tile .cnt { position: absolute; left: 6px; bottom: 6px; font-family: var(--f-data); font-size: 10px; font-weight: 600; background: rgba(0,0,0,.6); color: #fff; padding: 1px 6px; border-radius: 99px; }
+.tile .tp .rl { position: absolute; left: 6px; top: 6px; }
+.tile .tn { font-size: 12.5px; font-weight: 600; line-height: 1.2; hyphens: auto; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.tile:not(.seen) .tn { color: var(--muted); font-weight: 500; }
+
+/* Log */
+.month { margin-top: 22px; }
+.mhead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 8px; }
+.mhead h2 { font-family: var(--f-display); font-weight: 800; font-size: 20px; margin: 0; }
+.mhead span { font-size: 12px; color: var(--muted); font-weight: 600; }
+.entries { display: flex; flex-direction: column; gap: 8px; }
+.entry { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 8px; padding-right: 14px; text-align: left; width: 100%; background: var(--surface); border-radius: 18px; border: 1px solid var(--line); position: relative; overflow: hidden; }
+.entry::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--oc); }
+.entry .eph { width: 64px; height: 64px; border-radius: 13px; overflow: hidden; position: relative; background: var(--surface-2); }
+.entry .eph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.entry .eph b { position: absolute; right: 4px; bottom: 4px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,.6); color: #fff; border-radius: 99px; padding: 0 5px; }
+.entry .what { min-width: 0; }
+.entry .what strong { font-weight: 700; display: block; line-height: 1.25; }
+.entry .where { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.entry .day { font-family: var(--f-data); text-align: center; line-height: 1.05; }
+.entry .day b { display: block; font-size: 19px; font-weight: 600; }
+.entry .day span { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+
+/* Bottom nav + FAB */
+nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); padding: 6px var(--gutter-r) calc(6px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+nav.tabs .inner { max-width: 540px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); height: calc(var(--nav-h) - 12px); }
+nav.tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 11px; color: var(--muted); font-weight: 600; }
+nav.tabs button svg { width: 23px; height: 23px; }
+nav.tabs button[aria-current="page"] { color: var(--ink); }
+nav.tabs button[aria-current="page"] svg { color: var(--accent); }
+.fab { position: fixed; z-index: 15; right: calc(var(--gutter-r) + 2px); bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px)); background: var(--accent); color: var(--accent-ink); border-radius: 99px; padding: 14px 20px 14px 16px; font-weight: 700; font-size: 16px; display: flex; gap: 6px; align-items: center; box-shadow: var(--shadow); }
+@media (min-width: 572px) { .fab { right: calc(50% - 270px + 2px); } }
+.fab svg { width: 20px; height: 20px; }
+
+/* Sheet */
+.scrim { position: fixed; inset: 0; z-index: 30; background: var(--scrim); }
+.sheet { position: fixed; z-index: 31; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 580px; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 26px 26px 0 0; box-shadow: var(--shadow); padding: 10px var(--gutter-r) calc(24px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); animation: up .24s cubic-bezier(.2,.9,.3,1.1); }
+@keyframes up { from { transform: translateY(30px); opacity: .5; } to { transform: none; opacity: 1; } }
+.sheet-head { position: sticky; top: -10px; z-index: 3; height: 0; }
+.grab { width: 40px; height: 4px; border-radius: 99px; background: var(--line); margin: 0 auto; position: relative; top: -2px; }
+.sheet-x { position: absolute; right: -4px; top: 6px; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.2); }
+.sheet-x svg { width: 18px; height: 18px; }
+.sheet h2.t { font-family: var(--f-display); font-weight: 800; font-size: 30px; line-height: 1.02; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.sheet .latin { font-size: 17px; margin-top: 2px; }
+.sheet > .label:first-of-type { margin-top: 16px; padding-right: 48px; }
+.photo { margin: 16px 0 14px; }
+.photo .frame { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 22px; overflow: hidden; background: var(--oc); display: grid; place-items: center; position: relative; }
+.photo .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo .frame > svg { width: 62%; height: auto; }
+.photo .frame > svg .sil-line { stroke: none; } .photo .frame > svg .sil-ground { stroke: rgba(255,255,255,.4); }
+.photo .frame > svg .sil-empty, .photo .frame > svg .sil-fill { fill: rgba(255,255,255,.85); }
+.photo.ex .frame img { filter: grayscale(.85); }
+.stamp { position: absolute; right: 14px; top: 14px; transform: rotate(8deg); font-family: var(--f-display); font-weight: 800; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--oc); padding: 5px 12px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+.ordertag { position: absolute; left: 12px; bottom: 12px; display: inline-flex; align-items: center; gap: 6px; background: var(--oc); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+.credit { font-size: 11px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+.credit a { text-decoration: underline; text-underline-offset: 2px; }
+.facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+.fact .label { font-size: 10px; }
+.fact b { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; line-height: 1.25; }
+.fact .rl { margin-top: 4px; }
+.note-ex { margin-top: 12px; font-size: 13px; background: color-mix(in srgb, var(--ex) 12%, var(--surface)); border-radius: 14px; padding: 10px 12px; color: var(--ink); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 14px 18px; border-radius: 16px; font-weight: 700; font-size: 16px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); width: 100%; margin-top: 18px; }
+.btn.ghost { border: 1.5px solid var(--line); background: var(--surface); }
+.sheet-list { margin-top: 22px; display: flex; flex-direction: column; gap: 8px; }
+.s-item { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+.s-item .when { font-weight: 700; }
+.s-item .coords, .coordline { font-family: var(--f-data); font-size: 12px; color: var(--muted); }
+.s-item .note { grid-column: 1 / -1; font-size: 14px; overflow-wrap: anywhere; }
+.s-item .thumbs { grid-column: 1 / -1; }
+.thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 6px; }
+.thumbs button, .thumbs .t { aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: var(--surface-2); position: relative; }
+.thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumbs .x { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; font-size: 14px; line-height: 22px; text-align: center; }
+.del { font-size: 13px; color: var(--muted); align-self: start; font-weight: 600; }
+.del.armed { color: var(--danger); }
+
+form { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
+form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; }
+form input[type="text"], form input[type="datetime-local"], form textarea { font: inherit; font-size: 16px; font-weight: 400; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); width: 100%; }
+form input:focus, form textarea:focus { outline: none; border-color: var(--accent); }
+form textarea { min-height: 76px; resize: vertical; }
+.pick { display: flex; align-items: center; justify-content: center; gap: 8px; border: 2px dashed var(--oc); color: var(--oc); background: color-mix(in srgb, var(--oc) 8%, var(--surface)); border-radius: 18px; padding: 18px; font-weight: 700; cursor: pointer; }
+.pick svg { width: 22px; height: 22px; }
+.pick input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.gps { border-radius: 14px; background: color-mix(in srgb, var(--accent) 12%, var(--surface)); padding: 10px 12px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+.gps.warn { background: var(--surface); border: 1.5px dashed var(--line); color: var(--muted); }
+.gps.warn strong { color: var(--ink); }
+.form-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+.form-actions .btn.primary { margin-top: 0; }
+.hint { font-size: 12px; color: var(--muted); font-weight: 400; }
+.mini { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.mini img, .mini .ph { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; background: var(--oc); flex: none; }
+.mini h2.t { font-size: 24px; }
+
+.credits { margin-top: 14px; display: flex; flex-direction: column; }
+.credits div { padding: 8px 0; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.credits div b { color: var(--ink); font-weight: 700; }
+.badgegrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 8px; margin-top: 16px; justify-items: center; }
+.badgegrid .badge { width: 100%; }
+.badgegrid .bd { font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+/* Celebration */
+.cele { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; background: var(--scrim); padding: 24px var(--gutter-r) 24px var(--gutter-l); }
+.cele .card { background: var(--surface); border-radius: 28px; padding: 26px 22px 20px; width: min(100%, 360px); text-align: center; box-shadow: var(--shadow); animation: pop .45s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
+.cele .kick { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--oc); }
+.cele .cimg { width: 132px; height: 132px; border-radius: 50%; margin: 14px auto 12px; overflow: hidden; box-shadow: 0 0 0 5px var(--oc); background: var(--oc); position: relative; }
+.cele .cimg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cele h3 { font-family: var(--f-display); font-weight: 800; font-size: 28px; line-height: 1.05; margin: 0; letter-spacing: -.02em; }
+.cele p { margin: 6px 0 0; color: var(--muted); }
+.cele .count { font-family: var(--f-display); font-weight: 800; font-size: 18px; color: var(--ink); margin-top: 10px; }
+.cele .unl { display: flex; align-items: center; gap: 12px; text-align: left; background: var(--bg); border-radius: 16px; padding: 10px 12px; margin-top: 14px; }
+.cele .unl .medal { width: 48px; height: 48px; flex: none; }
+.cele .unl .medal .g { font-size: 16px; }
+.cele .unl .medal svg.sil { width: 32px; }
+.cele .unl b { display: block; font-size: 14px; }
+.cele .unl span { font-size: 12px; color: var(--muted); }
+canvas.confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 56; }
+
+.lightbox { position: fixed; inset: 0; z-index: 60; background: #050806; display: grid; place-items: center; padding: calc(56px + env(safe-area-inset-top, 0px)) var(--gutter-r) calc(24px + env(safe-area-inset-bottom, 0px)) var(--gutter-l); }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.lightbox button { position: absolute; top: calc(10px + env(safe-area-inset-top, 0px)); right: var(--gutter-r); color: #fff; font-size: 15px; font-weight: 700; padding: 8px 14px; border-radius: 99px; background: rgba(255,255,255,.16); }
+.toast { position: fixed; z-index: 70; left: 50%; transform: translateX(-50%); bottom: calc(var(--nav-h) + 22px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 99px; font-size: 14px; font-weight: 600; box-shadow: var(--shadow); max-width: calc(100vw - 32px); text-align: center; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .cele .card { animation: none; }
+  .press, .tile .tp img { transition: none; }
+}
+</style>
+
+<div class="app" lang="de">
+  <header class="top">
+    <div class="brand"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="115" fill="#13201a"/><path d="M262.9,98.2 A158,158 0 0 1 362.7,139.5" fill="none" stroke="#b07a12" stroke-width="40"/><path d="M372.5,149.3 A158,158 0 0 1 413.8,249.1" fill="none" stroke="#7d4e9e" stroke-width="40"/><path d="M413.8,262.9 A158,158 0 0 1 372.5,362.7" fill="none" stroke="#3d4db0" stroke-width="40"/><path d="M362.7,372.5 A158,158 0 0 1 262.9,413.8" fill="none" stroke="#d0612a" stroke-width="40"/><path d="M249.1,413.8 A158,158 0 0 1 149.3,372.5" fill="none" stroke="#2a8a7c" stroke-width="40"/><path d="M139.5,362.7 A158,158 0 0 1 98.2,262.9" fill="none" stroke="#c73e4a" stroke-width="40"/><path d="M98.2,249.1 A158,158 0 0 1 139.5,149.3" fill="none" stroke="#4b8a2c" stroke-width="40"/><path d="M149.3,139.5 A158,158 0 0 1 249.1,98.2" fill="none" stroke="#1f7bb8" stroke-width="40"/><g transform="translate(256,258) scale(1.1) translate(-256,-262)"><g fill="#fff"><path d="M256,252 C226,252 200,282 196,304 C192,326 210,336 228,332 C240,329 248,324 256,324 C264,324 272,329 284,332 C302,336 320,326 316,304 C312,282 286,252 256,252 Z"/><ellipse cx="200" cy="232" rx="19" ry="25" transform="rotate(-22 200 232)"/><ellipse cx="236" cy="198" rx="19" ry="27" transform="rotate(-7 236 198)"/><ellipse cx="276" cy="198" rx="19" ry="27" transform="rotate(7 276 198)"/><ellipse cx="312" cy="232" rx="19" ry="25" transform="rotate(22 312 232)"/></g></g></svg>Lupa</div>
+    <div class="scope">Säugetiere · DE</div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<button class="fab press" id="fab" type="button" aria-label="Neue Sichtung erfassen">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  Sichtung
+</button>
+
+<nav class="tabs" aria-label="Hauptnavigation">
+  <div class="inner">
+    <button type="button" data-tab="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 8.5 8.5H12z" fill="currentColor" stroke="none"/></svg>
+      Übersicht
+    </button>
+    <button type="button" data-tab="species">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+      Arten
+    </button>
+    <button type="button" data-tab="log">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M8 8h6M8 12h6" stroke-linecap="round"/></svg>
+      Logbuch
+    </button>
+  </div>
+</nav>
+
+<div id="sheetRoot"></div>
+<div id="celeRoot"></div>
+<div id="lightRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* ---------- Data: species (BfN Rote Liste 2020) + confirmed image credits ---------- */
+const GROUP_NAMES = { erinaceomorpha: "Igelartige", soricomorpha: "Spitzmausartige", chiroptera: "Fledermäuse", lagomorpha: "Hasenartige", rodentia: "Nagetiere", carnivora: "Raubtiere", ungulata: "Huftiere", cetacea: "Wale" };
+const RL_TEXT = { "0": "Ausgestorben oder verschollen", "1": "Vom Aussterben bedroht", "2": "Stark gefährdet", "3": "Gefährdet", "G": "Gefährdung unbekannten Ausmaßes", "R": "Extrem selten", "V": "Vorwarnliste", "D": "Daten unzureichend", "*": "Ungefährdet", "nb": "Nicht bewertet", "": "Keine Kategorie" };
+const STATUS_TEXT = { "I": "Heimisch", "I-nb": "Heimisch", "N-iv": "Gebietsfremd, invasiv", "N-nb": "Gebietsfremd", "U": "Unbeständig oder Gast", "?": "Status unklar" };
+const ROWS = [["ostigel", "Ostigel", "Erinaceus roumanicus", "erinaceomorpha", "Igelartige", "0", "I", 1, "George Chernilevsky", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Erinaceus_roumanicus_2020_G2.jpg"], ["westigel", "Westigel", "Erinaceus europaeus", "erinaceomorpha", "Igelartige", "V", "I", 0, "Jörg Hempel", "CC BY-SA 2.0 de", "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en", "https://commons.wikimedia.org/wiki/File:Erinaceus_europaeus_LC0119.jpg"], ["alpenspitzmaus", "Alpenspitzmaus", "Sorex alpinus", "soricomorpha", "Spitzmausartige", "G", "I", 0, "Martin Scheuch (iNaturalist user ma_sche)", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:Sorex_alpinus_-_Martin_Scheuch_(cropped).jpeg"], ["feldspitzmaus", "Feldspitzmaus", "Crocidura leucodon", "soricomorpha", "Spitzmausartige", "V", "I", 0, "Dodoni", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Crocidura_leucodon.JPG"], ["gartenspitzmaus", "Gartenspitzmaus", "Crocidura suaveolens", "soricomorpha", "Spitzmausartige", "3", "I", 0, "Sebastian Ritter", "CC BY-SA 2.0 de", "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en", "https://commons.wikimedia.org/wiki/File:Gartenspitzmaus.jpg"], ["hausspitzmaus", "Hausspitzmaus", "Crocidura russula", "soricomorpha", "Spitzmausartige", "*", "I", 0, "DerHexer, Wikimedia Commons", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:WLMMH_(DerHexer)_022.jpg"], ["maulwurf", "Maulwurf", "Talpa europaea", "soricomorpha", "Spitzmausartige", "*", "I", 0, "Mick E. Talbot", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Mr_Mole.jpg"], ["schabrackenspitzmaus", "Schabrackenspitzmaus", "Sorex coronatus", "soricomorpha", "Spitzmausartige", "*", "I", 0, "Manuel R.", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Sorex_araneus2.JPG"], ["sumpfspitzmaus", "Sumpfspitzmaus", "Neomys anomalus milleri", "soricomorpha", "Spitzmausartige", "2", "I", 0, "David Perez", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Neomys_anomalus_05_by-dpc.jpg"], ["waldspitzmaus", "Waldspitzmaus", "Sorex araneus", "soricomorpha", "Spitzmausartige", "*", "I", 0, "WWalas", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:SorexAraneus_wwalas_01.JPG"], ["wasserspitzmaus", "Wasserspitzmaus", "Neomys fodiens", "soricomorpha", "Spitzmausartige", "V", "I", 0, "Accipiter (R. Altenkamp, Berlin)", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Neomys_fodiens_TF_090829.jpg"], ["zwergspitzmaus", "Zwergspitzmaus", "Sorex minutus", "soricomorpha", "Spitzmausartige", "*", "I", 0, "Polandeze (Flickr)", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Sorex_minutus.jpg"], ["alpenfledermaus", "Alpenfledermaus", "Hypsugo savii", "chiroptera", "Fledermäuse", "R", "I", 0, "Tomaž Jančar, bearbeitet von Linnea", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Hypsugo_savii_Trtar_cropped.jpg"], ["bechsteinfledermaus", "Bechsteinfledermaus", "Myotis bechsteinii", "chiroptera", "Fledermäuse", "2", "I", 0, "Gilles San Martin from Namur, Belgium", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Myotis_bechsteinii_(2320325021).jpg"], ["braunes-langohr", "Braunes Langohr", "Plecotus auritus", "chiroptera", "Fledermäuse", "3", "I", 0, "Fourrure from France", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Plecotus_auritus_2013-2_(cropped).jpg"], ["breitfluegelfledermaus", "Breitflügelfledermaus", "Eptesicus serotinus", "chiroptera", "Fledermäuse", "3", "I", 0, "Mnolf", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Eptesicus_serotinus.jpg"], ["fransenfledermaus", "Fransenfledermaus", "Myotis nattereri nattereri", "chiroptera", "Fledermäuse", "*", "I", 0, "MissMhisi", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Fransenfledermaus.jpg"], ["graues-langohr", "Graues Langohr", "Plecotus austriacus", "chiroptera", "Fledermäuse", "1", "I", 0, "Andrei Sakhno", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Plecotus_austriacus2.jpg"], ["grosse-bartfledermaus", "Große Bartfledermaus", "Myotis brandtii", "chiroptera", "Fledermäuse", "*", "I", 0, "Herman Lankreijer", "CC BY 2.5", "https://creativecommons.org/licenses/by/2.5", "https://commons.wikimedia.org/wiki/File:060809-224340_0029_Myotis_brandtii.jpg"], ["grosse-hufeisennase", "Große Hufeisennase", "Rhinolophus ferrumequinum", "chiroptera", "Fledermäuse", "1", "I", 0, "Prof. emeritus Hans Schneider (Geyersberg)", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Gro%C3%9Fe_Hufeisennase_(01).jpg"], ["grosser-abendsegler", "Großer Abendsegler", "Nyctalus noctula noctula", "chiroptera", "Fledermäuse", "V", "I", 0, "Krzysztof1243", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:Nyctalus_noctula_on_hand.jpg"], ["grosses-mausohr", "Großes Mausohr", "Myotis myotis myotis", "chiroptera", "Fledermäuse", "*", "I", 0, "MissMhisi", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Myotis_myotis_Gro%C3%9Fes_Mausohr2.jpg"], ["kleinabendsegler", "Kleinabendsegler", "Nyctalus leisleri", "chiroptera", "Fledermäuse", "D", "I", 0, "Manuel Werner, Nürtingen, AG Fledermausschutz Baden-Württemberg", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Nyctalus_leisleri.jpg"], ["kleine-bartfledermaus", "Kleine Bartfledermaus", "Myotis mystacinus", "chiroptera", "Fledermäuse", "*", "I", 0, "Manuel Ruedi (Natural History Museum of Geneva)", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Myotis_mystacinus_-_Manuel_Ruedi.JPG"], ["kleine-hufeisennase", "Kleine Hufeisennase", "Rhinolophus hipposideros", "chiroptera", "Fledermäuse", "2", "I", 0, "JozefBem1009", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:Rhinolophus_hipposideros_2024.jpg"], ["langfluegelfledermaus", "Langflügelfledermaus", "Miniopterus schreibersii", "chiroptera", "Fledermäuse", "0", "I", 1, "C. Robiller/naturlichter.de", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Miniopterus_scheibersii_01-cropped.jpg"], ["mopsfledermaus", "Mopsfledermaus", "Barbastella barbastellus barbastellus", "chiroptera", "Fledermäuse", "2", "I", 0, "Jan Ebr", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:Barbastella_barbastellus_252677624.jpg"], ["mueckenfledermaus", "Mückenfledermaus", "Pipistrellus pygmaeus", "chiroptera", "Fledermäuse", "*", "I", 0, "Evgeniy Yakhontov", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Pipistrellus_pygmaeus01.jpg"], ["nordfledermaus", "Nordfledermaus", "Eptesicus nilssonii", "chiroptera", "Fledermäuse", "3", "I", 0, "Mnolf", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Eptesicus_nilssoni.jpg"], ["nymphenfledermaus", "Nymphenfledermaus", "Myotis alcathoe", "chiroptera", "Fledermäuse", "1", "I", 0, "Manuel Ruedi (Natural History Museum of Geneva)", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Myotis_alcathoe_-_Manuel_Ruedi_-_2.JPG"], ["rauhautfledermaus", "Rauhautfledermaus", "Pipistrellus nathusii", "chiroptera", "Fledermäuse", "*", "I", 0, "Mnolf", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Pipistrellus_nathusii.jpg"], ["teichfledermaus", "Teichfledermaus", "Myotis dasycneme", "chiroptera", "Fledermäuse", "G", "I", 0, "Gilles San Martin from Namur, Belgium", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Myotis_dasycneme.jpg"], ["wasserfledermaus", "Wasserfledermaus", "Myotis daubentonii", "chiroptera", "Fledermäuse", "*", "I", 0, "Guido Gerding", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:XN_Myotis_daubentonii_157.jpg"], ["weissrandfledermaus", "Weißrandfledermaus", "Pipistrellus kuhlii", "chiroptera", "Fledermäuse", "*", "I", 0, "Mnolf", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Pipistrellus_kuhlii.jpg"], ["wimperfledermaus", "Wimperfledermaus", "Myotis emarginatus", "chiroptera", "Fledermäuse", "2", "I", 0, "C. Robiller / www.naturlichter.de", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Myotis-emarginatus.jpg"], ["zweifarbfledermaus", "Zweifarbfledermaus", "Vespertilio murinus", "chiroptera", "Fledermäuse", "D", "I", 0, "Magne Flåten", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Vespertilio_murinus_male.jpg"], ["zwergfledermaus", "Zwergfledermaus", "Pipistrellus pipistrellus", "chiroptera", "Fledermäuse", "*", "I", 0, "", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Pipistrellus_pipistrellus_lateral.jpg"], ["feldhase", "Feldhase", "Lepus europaeus", "lagomorpha", "Hasenartige", "3", "I", 0, "Bengt Nyman from Vaxholm, Sweden", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Lepus_EM115247_(27783674376).jpg"], ["schneehase", "Schneehase", "Lepus timidus", "lagomorpha", "Hasenartige", "R", "I", 0, "polandeze", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Mountain_hare-Lepus_timidus.jpg"], ["wildkaninchen", "Wildkaninchen", "Oryctolagus cuniculus", "lagomorpha", "Hasenartige", "V", "I", 0, "Charles J. Sharp", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Rabbit_(Oryctolagus_cuniculus)_Aston_Upthorpe.jpg"], ["alpenmurmeltier", "Alpenmurmeltier", "Marmota marmota", "rodentia", "Nagetiere", "*", "I", 0, "Giles Laurent", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:071_Wild_marmot_at_Grand_Muveran_Nature_Reserve_Photo_by_Giles_Laurent.jpg"], ["alpenwaldmaus", "Alpenwaldmaus", "Apodemus alpicola", "rodentia", "Nagetiere", "R", "I", 0, "Mattia Menchetti", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Apodemus_alpicola.jpg"], ["baumschlaefer", "Baumschläfer", "Dryomys nitedula", "rodentia", "Nagetiere", "R", "I", 0, "Attis", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Erdei_pele.jpg"], ["baumstreifenhoernchen", "Baumstreifenhörnchen", "Tamiops cf. swinhoei", "rodentia", "Nagetiere", "", "?", 0, "JJ Harrison", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Tamiops_mcclellandii_-_Kaeng_Krachan.jpg"], ["bayerische-kleinwuehlmaus", "Bayerische Kleinwühlmaus", "Microtus liechtensteini bavaricus", "rodentia", "Nagetiere", "0", "I", 1, "Nadja Hattinger", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Bayerische_Kurzohrmaus_(Microtus_bavaricus).jpg"], ["bisam", "Bisam", "Ondatra zibethicus", "rodentia", "Nagetiere", "nb", "N-iv", 0, "David Menke", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Bisamratte_auf_Strand.jpg"], ["brandmaus", "Brandmaus", "Apodemus agrarius", "rodentia", "Nagetiere", "D", "I", 0, "Gerizo", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Brandmaus.jpg"], ["eichhoernchen", "Eichhörnchen", "Sciurus vulgaris", "rodentia", "Nagetiere", "*", "I", 0, "Ray eye", "CC BY-SA 2.0 de", "https://creativecommons.org/licenses/by-sa/2.0/de/deed.en", "https://commons.wikimedia.org/wiki/File:Eichh%C3%B6rnchen_D%C3%BCsseldorf_Hofgarten_edit.jpg"], ["erdmaus", "Erdmaus", "Microtus agrestis", "rodentia", "Nagetiere", "*", "I", 0, "Fer boei at Dutch Wikipedia", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Aardmuis.jpg"], ["europaeischer-biber", "Europäischer Biber", "Castor fiber", "rodentia", "Nagetiere", "V", "I", 0, "Per Harald Olsen", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Beaver_pho34.jpg"], ["europaeisches-ziesel", "Europäisches Ziesel", "Spermophilus citellus", "rodentia", "Nagetiere", "0", "I", 1, "Charles J. Sharp", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:European_souslik_(Spermophilus_citellus)_Obrovisko_2.jpg"], ["feldhamster", "Feldhamster", "Cricetus cricetus", "rodentia", "Nagetiere", "1", "I", 0, "Charles J. Sharp", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:European_hamster_(Cricetus_cricetus)_Meidling.jpg"], ["feldmaus", "Feldmaus", "Microtus arvalis", "rodentia", "Nagetiere", "*", "I", 0, "Dieter TD", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Feldmaus_Microtus_arvalis.jpg"], ["gartenschlaefer", "Gartenschläfer", "Eliomys quercinus", "rodentia", "Nagetiere", "2", "I", 0, "Fentriss", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Gartenschlaefer082014a.jpg"], ["gelbhalsmaus", "Gelbhalsmaus", "Apodemus flavicollis", "rodentia", "Nagetiere", "*", "I", 0, "James Lindsey", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Apodemus.flavicollis.jpg"], ["haselmaus", "Haselmaus", "Muscardinus avellanarius", "rodentia", "Nagetiere", "V", "I", 0, "Danielle Schwarz", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Haselmaus.jpg"], ["hausratte", "Hausratte", "Rattus rattus", "rodentia", "Nagetiere", "1", "I", 0, "Jakub Hałun", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:20191212_Szczury_w_%C5%9Awi%C4%85tyni_Karni_Maty_w_De%C5%9Bnok_1038_8111_DxO.jpg"], ["helgolaender-hausmaus", "Helgoländer Hausmaus", "Mus domesticus helgolandicus", "rodentia", "Nagetiere", "R", "I", 0, "George Shuklin", "CC BY-SA 1.0", "https://creativecommons.org/licenses/by-sa/1.0", "https://commons.wikimedia.org/wiki/File:%D0%9C%D1%8B%D1%88%D1%8C_3.jpg"], ["kanadischer-biber", "Kanadischer Biber", "Castor canadensis", "rodentia", "Nagetiere", "nb", "N-nb", 0, "LASZLO ILYES (laszlo-photo) from Cleveland, Ohio, USA", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Castor_canadensis.jpg"], ["kleinwuehlmaus", "Kleinwühlmaus", "Microtus subterraneus", "rodentia", "Nagetiere", "D", "I", 0, "Vojtěch Zavadil", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:5928-Microtus_subterraneus-%C4%8Certova_zahr%C3%A1dka-24.7.20_(cropped).jpg"], ["nutria", "Nutria", "Myocastor coypus", "rodentia", "Nagetiere", "nb", "N-iv", 0, "Petar Milošević", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Myocastor_coypus_02.jpg"], ["oestliche-hausmaus", "Östliche Hausmaus", "Mus musculus", "rodentia", "Nagetiere", "*", "I", 0, "George Shuklin", "CC BY-SA 1.0", "https://creativecommons.org/licenses/by-sa/1.0", "https://commons.wikimedia.org/wiki/File:%D0%9C%D1%8B%D1%88%D1%8C_2.jpg"], ["ostschermaus", "Ostschermaus", "Arvicola amphibius", "rodentia", "Nagetiere", "*", "I", 0, "Rabensteiner", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Arvicola_terrestris.jpg"], ["roetelmaus", "Rötelmaus", "Myodes glareolus", "rodentia", "Nagetiere", "*", "I", 0, "Christian Schulz", "CC BY-SA 3.0 de", "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en", "https://commons.wikimedia.org/wiki/File:Rotelmaus-Frontal_ZK1_02496_c_2k4.jpg"], ["schneemaus", "Schneemaus", "Chionomys nivalis", "rodentia", "Nagetiere", "R", "I", 0, "Svíčková", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Schneemaus2.JPG"], ["sibirisches-streifenhoernchen", "Sibirisches Streifenhörnchen", "Eutamias sibiricus", "rodentia", "Nagetiere", "", "U", 0, "AndiW", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Streifenhoernchen.jpg"], ["siebenschlaefer", "Siebenschläfer", "Glis glis", "rodentia", "Nagetiere", "*", "I", 0, "Herwig Winter", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Siebenschl%C3%A4fer_im_Geo-Naturpark_Bergstra%C3%9Fe-Odenwald.jpg"], ["streifen-backenhoernchen", "Streifen-Backenhörnchen", "Tamias striatus", "rodentia", "Nagetiere", "", "U", 0, "Ryan Hodnett", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Eastern_Chipmunk_(Tamias_striatus)_-_Mississauga,_Ontario_2024-05-01_(02).jpg"], ["sumpfmaus", "Sumpfmaus", "Alexandromys oeconomus", "rodentia", "Nagetiere", "2", "I", 0, "Sigi27", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Microtus_oeconomus_mehelyi.jpg"], ["waldbirkenmaus", "Waldbirkenmaus", "Sicista betulina", "rodentia", "Nagetiere", "2", "I", 0, "AfroBrazilian", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Sicista_betulina_03.JPG"], ["waldmaus", "Waldmaus", "Apodemus sylvaticus", "rodentia", "Nagetiere", "*", "I", 0, "Christian Fischer", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:ApodemusSylvaticus.jpg"], ["wanderratte", "Wanderratte", "Rattus norvegicus", "rodentia", "Nagetiere", "*", "I", 0, "Hans-Jörg Hellwig", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Co-swand-09-12.jpg"], ["westliche-hausmaus", "Westliche Hausmaus", "Mus domesticus domesticus", "rodentia", "Nagetiere", "*", "I", 0, "Wualex", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Black_6_mouse_eating.jpg"], ["zwergmaus", "Zwergmaus", "Micromys minutus", "rodentia", "Nagetiere", "V", "I", 0, "Hecke", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Micromysminutus1.jpg"], ["atlantische-kegelrobbe", "Atlantische Kegelrobbe", "Halichoerus grypus atlanticus", "carnivora", "Raubtiere", "3", "I", 0, "kitmasterbloke", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Donna_Nook_NNR_-_Grey_Seal_pupping_and_breeding_season_-_38835979591.jpg"], ["baltische-kegelrobbe", "Baltische Kegelrobbe", "Halichoerus grypus grypus", "carnivora", "Raubtiere", "2", "I", 0, "Lucc77", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Two_seals_in_the_water.jpg"], ["baummarder", "Baummarder", "Martes martes", "carnivora", "Raubtiere", "V", "I", 0, "Dani Kropivnik", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Martes_martes_crop.jpg"], ["braunbaer", "Braunbär", "Ursus arctos", "carnivora", "Raubtiere", "0", "I", 1, "Robert F. Tobler", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Kamchatka_Brown_Bear_near_Dvuhyurtochnoe_on_2015-07-23.jpg"], ["dachs", "Dachs", "Meles meles", "carnivora", "Raubtiere", "*", "I", 0, "BadgerHero", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Badger-badger.jpg"], ["europaeischer-nerz", "Europäischer Nerz", "Mustela lutreola", "carnivora", "Raubtiere", "0", "I", 1, "PetroKaterynych", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:%D0%92%D1%96%D0%B7%D0%BE%D0%BD_%D1%80%D1%96%D1%87%D0%BA%D0%BE%D0%B2%D0%B8%D0%B9_Neogale_vison_Schreber,_1777.jpg"], ["fischotter", "Fischotter", "Lutra lutra", "carnivora", "Raubtiere", "3", "I", 0, "Bernard Landgraf", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Fischotter,_Lutra_Lutra.JPG"], ["fuchs", "Fuchs", "Vulpes vulpes", "carnivora", "Raubtiere", "*", "I", 0, "Martin Mecnarowski", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Vulpes_vulpes_1_(Martin_Mecnarowski).jpg"], ["goldschakal", "Goldschakal", "Canis aureus", "carnivora", "Raubtiere", "", "U", 0, "Giles Laurent", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:033_Golden_jackal_in_Keoladeo_National_Park_Photo_by_Giles_Laurent.jpg"], ["hauskatze", "Hauskatze", "Felis catus", "carnivora", "Raubtiere", "", "U", 0, "Laitche", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Tabby_cats_of_%C5%8Cizumi_Ryokuchi_Park,_January_2019_-_8816.jpg"], ["hermelin", "Hermelin", "Mustela erminea", "carnivora", "Raubtiere", "D", "I", 0, "James Lindsey", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Mustela.erminea.jpg"], ["iltis", "Iltis", "Mustela putorius", "carnivora", "Raubtiere", "3", "I", 0, "Malene Thyssen", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Ilder.jpg"], ["luchs", "Luchs", "Lynx lynx", "carnivora", "Raubtiere", "1", "I", 0, "Martin Mecnarowski", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Lynx_lynx_1_(Martin_Mecnarowski).jpg"], ["marderhund", "Marderhund", "Nyctereutes procyonoides", "carnivora", "Raubtiere", "nb", "N-iv", 0, "Доктор рукиноги", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:%D0%95%D0%BD%D0%BE%D1%82%D0%BE%D0%B2%D0%B8%D0%B4%D0%BD%D0%B0%D1%8F_%D1%81%D0%BE%D0%B1%D0%B0%D0%BA%D0%B0_%D0%93%D1%80%D0%BE%D0%B4%D0%BD%D0%BE_(cropped_2).jpg"], ["mauswiesel", "Mauswiesel", "Mustela nivalis", "carnivora", "Raubtiere", "D", "I", 0, "Keven Law", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Mustela_nivalis_-British_Wildlife_Centre-4.jpg"], ["mink", "Mink", "Neovison vison", "carnivora", "Raubtiere", "nb", "N-nb", 0, "Anna Wójtowicz", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Kunawodna3.JPG"], ["seehund", "Seehund", "Phoca vitulina vitulina", "carnivora", "Raubtiere", "G", "I", 0, "Marcel Burkhard alias cele4", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0/", "https://commons.wikimedia.org/wiki/File:Seehund2cele4.jpg"], ["steinmarder", "Steinmarder", "Martes foina", "carnivora", "Raubtiere", "*", "I", 0, "Charles J. Sharp", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Stone_marten_(Martes_foina)_Drenthe.jpg"], ["steppeniltis", "Steppeniltis", "Mustela eversmanii", "carnivora", "Raubtiere", "", "U", 0, "Andrey Giljov", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Wild_steppe_polecat_(cropped).jpg"], ["waschbaer", "Waschbär", "Procyon lotor", "carnivora", "Raubtiere", "nb", "N-iv", 0, "Rhododendrites", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Raccoon_in_Central_Park_(35264).jpg"], ["wildkatze", "Wildkatze", "Felis silvestris silvestris", "carnivora", "Raubtiere", "3", "I", 0, "Michael Gäbler", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Die_Wildkatze_in_der_Wildnis.jpg"], ["wolf", "Wolf", "Canis lupus", "carnivora", "Raubtiere", "3", "I", 0, "User:Mas3cf", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Eurasian_wolf_2.jpg"], ["auerochse", "Auerochse", "Bos primigenius", "ungulata", "Huftiere", "0", "I", 1, "Charles Hamilton Smith", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Ur-painting.jpg"], ["damhirsch", "Damhirsch", "Dama dama", "ungulata", "Huftiere", "nb", "N-nb", 0, "Johann-Nikolaus Andreae", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Fallow_deer_in_field_(cropped).jpg"], ["elch", "Elch", "Alces alces", "ungulata", "Huftiere", "R", "I", 0, "Ryan Hagerty", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Alaskan_moose_pair_(6862339335).jpg"], ["gaemse", "Gämse", "Rupicapra rupicapra", "ungulata", "Huftiere", "V", "I", 0, "Giles Laurent", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:064_Wild_Chamois_Parc_r%C3%A9gional_Chasseral_Photo_by_Giles_Laurent.jpg"], ["mufflon", "Mufflon", "Ovis orientalis", "ungulata", "Huftiere", "nb", "N-nb", 0, "Jörg Hempel", "CC BY-SA 3.0 de", "https://creativecommons.org/licenses/by-sa/3.0/de/deed.en", "https://commons.wikimedia.org/wiki/File:Ovis_orientalis_LC0267.jpg"], ["reh", "Reh", "Capreolus capreolus", "ungulata", "Huftiere", "*", "I", 0, "Sylvouille at French Wikipedia", "CC BY-SA 1.0", "https://creativecommons.org/licenses/by-sa/1.0", "https://commons.wikimedia.org/wiki/File:Chevreuil(brocard)-HAYE_sylvain.jpg"], ["rothirsch", "Rothirsch", "Cervus elaphus", "ungulata", "Huftiere", "*", "I", 0, "Lviatour", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Cervus_elaphus_Luc_Viatour_6.jpg"], ["sikahirsch", "Sikahirsch", "Cervus nippon", "ungulata", "Huftiere", "nb", "N-nb", 0, "Donald Macauley", "CC BY-SA 2.0", "https://creativecommons.org/licenses/by-sa/2.0", "https://commons.wikimedia.org/wiki/File:Flickr_-_don_macauley_-_Sika_Deer.jpg"], ["steinbock", "Steinbock", "Capra ibex", "ungulata", "Huftiere", "R", "I", 0, "Giles Laurent", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:002_Wild_Alpine_Ibex_Swiss_Alps_and_Creux_du_Van_Photo_by_Giles_Laurent.jpg"], ["wildpferd", "Wildpferd", "Equus ferus", "ungulata", "Huftiere", "0", "I", 1, "Roman Uchytel, Paleoartist", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Equus_latipes_Gromova.jpg"], ["wildschwein", "Wildschwein", "Sus scrofa", "ungulata", "Huftiere", "*", "I", 0, "Superbass", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Wildsau_im_wilderlebnispark_daun.jpg"], ["wisent", "Wisent", "Bison bonasus", "ungulata", "Huftiere", "0", "I", 1, "Michael Gäbler", "CC BY 3.0", "https://creativecommons.org/licenses/by/3.0", "https://commons.wikimedia.org/wiki/File:Bison_bonasus_(Linnaeus_1758).jpg"], ["buckelwal", "Buckelwal", "Megaptera novaeangliae", "cetacea", "Wale", "", "U", 0, "Charles J. Sharp", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Humpback_whale_(Megaptera_novaeangliae)_with_calf_Moorea_2.jpg"], ["finnwal", "Finnwal", "Balaenoptera physalus", "cetacea", "Wale", "", "U", 0, "Aqqa Rosing-Asvid - Visit Greenland", "CC BY 2.0", "https://creativecommons.org/licenses/by/2.0", "https://commons.wikimedia.org/wiki/File:Finhval_(1).jpg"], ["gewoehnlicher-delfin", "Gewöhnlicher Delfin", "Delphinus delphis", "cetacea", "Wale", "", "U", 0, "Netspy", "CC BY-SA 3.0", "https://creativecommons.org/licenses/by-sa/3.0", "https://commons.wikimedia.org/wiki/File:Delphinus_delphis_03-cropped.jpg"], ["grosser-tuemmler", "Großer Tümmler", "Tursiops truncatus", "cetacea", "Wale", "0", "I", 1, "NASA", "Public domain", "", "https://commons.wikimedia.org/wiki/File:Tursiops_truncatus_01-cropped.jpg"], ["schweinswal", "Schweinswal", "Phocoena phocoena phocoena", "cetacea", "Wale", "2", "I", 0, "Ecomare/Sytske Dijksen", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Ecomare_-_bruinvissen_Michael_en_Jose_2012_(bruinvissen-michael-jose2012-1551-sd).jpg"], ["weissschnauzendelfin", "Weißschnauzendelfin", "Lagenorhynchus albirostris", "cetacea", "Wale", "R", "I", 0, "Charlotte Kirchner", "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0", "https://commons.wikimedia.org/wiki/File:Lagenorhynchus_albirostris_146341190.jpg"], ["weissseitendelfin", "Weißseitendelfin", "Lagenorhynchus acutus", "cetacea", "Wale", "", "U", 0, "Anna", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0", "https://commons.wikimedia.org/wiki/File:Atlantic_white-sided_dolphin_(cropped).jpg"], ["zwergwal", "Zwergwal", "Balaenoptera acutorostrata", "cetacea", "Wale", "1", "I", 0, "National Marine Sanctuaries", "Public domain", "", "https://commons.wikimedia.org/wiki/File:SBNMS_-_Minke_Whale_-_Breach_(28670557361)_(cropped).jpg"]];
+const SPECIES = {}, GROUPS = [];
+ROWS.forEach(([id, name, wiss, gid, gname, rl, status, ex, urheber, lizenz, lizenzUrl, seite]) => {
+  const s = { id, name, wiss, gid, gname, rl, status, ex: !!ex, credit: { urheber, lizenz, lizenzUrl, seite } };
+  SPECIES[id] = s;
+  let g = GROUPS.find(x => x.id === gid);
+  if (!g) GROUPS.push(g = { id: gid, name: gname, arten: [] });
+  g.arten.push(s);
+});
+const ALL = Object.values(SPECIES);
+const OBSERVABLE = ALL.filter(s => !s.ex).length;
+const THREATENED = new Set(["1", "2", "3", "G"]);
+
+/* ---------- Species photos: published next to the page as img/<id>.jpg ---------- */
+let PHOTOS = false;
+(() => { try { const p = new Image(); p.onload = () => { PHOTOS = true; render(); }; p.src = "img/westigel.jpg"; } catch (e) {} })();
+
+/* ---------- State ---------- */
+const KEY = "tierbuch.v1";   /* storage key kept so existing entries survive the rename */
+const day = 864e5, now = Date.now();
+const EXAMPLES = [
+  { artId: "reh", ts: now - 2 * day, lat: 52.9547, lon: 13.6917, ort: "Schorfheide, Brandenburg", notiz: "Zwei Ricken am Waldrand" },
+  { artId: "eichhoernchen", ts: now - 5 * day, lat: 52.5145, lon: 13.3501, ort: "Tiergarten, Berlin", notiz: "" },
+  { artId: "feldhase", ts: now - 11 * day, lat: 51.7767, lon: 11.1470, ort: "Harzvorland bei Quedlinburg", notiz: "" },
+  { artId: "zwergfledermaus", ts: now - 19 * day, lat: 50.9375, lon: 6.9603, ort: "Rheinufer, Köln", notiz: "Abends bei der Brücke jagend" },
+  { artId: "wildschwein", ts: now - 34 * day, lat: 49.0134, lon: 8.4044, ort: "Hardtwald, Karlsruhe", notiz: "Bache mit Frischlingen" },
+  { artId: "wisent", ts: now - 40 * day, lat: 51.0526, lon: 8.2869, ort: "Wisent-Wildnis, Rothaargebirge", notiz: "Im Schaugehege" },
+  { artId: "fuchs", ts: now - 47 * day, lat: 53.5511, lon: 9.9937, ort: "Hamburg-Altona", notiz: "" },
+].map((s, i) => ({ ...s, id: "bsp" + i, beispiel: true, fotos: [] }));
+
+let state = { sightings: [] };
+function load() {
+  try { const raw = localStorage.getItem(KEY); if (raw) { state = JSON.parse(raw); state.sightings.forEach(s => s.fotos = s.fotos || []); return; } } catch (e) {}
+  state = { sightings: EXAMPLES.slice() };
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function byArt() {
+  const m = {};
+  state.sightings.forEach(s => (m[s.artId] = m[s.artId] || []).push(s));
+  Object.values(m).forEach(l => l.sort((a, b) => b.ts - a.ts));
+  return m;
+}
+
+/* ---------- Own photos: IndexedDB, downscaled JPEG blobs ---------- */
+const memPhotos = new Map();   // fallback when IndexedDB is unavailable
+const urlCache = new Map();
+let dbp = null;
+function idb() {
+  if (dbp) return dbp;
+  dbp = new Promise((res, rej) => {
+    try {
+      const r = indexedDB.open("tierbuch-fotos", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("fotos");
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  });
+  return dbp;
+}
+async function putPhoto(id, blob) {
+  try { const db = await idb(); await new Promise((res, rej) => { const tx = db.transaction("fotos", "readwrite"); tx.objectStore("fotos").put(blob, id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  catch (e) { memPhotos.set(id, blob); }
+}
+async function getPhoto(id) {
+  if (memPhotos.has(id)) return memPhotos.get(id);
+  try { const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction("fotos").objectStore("fotos").get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); }); }
+  catch (e) { return null; }
+}
+async function delPhoto(id) {
+  memPhotos.delete(id);
+  if (urlCache.has(id)) { URL.revokeObjectURL(urlCache.get(id)); urlCache.delete(id); }
+  try { const db = await idb(); db.transaction("fotos", "readwrite").objectStore("fotos").delete(id); } catch (e) {}
+}
+async function photoURL(id) {
+  if (urlCache.has(id)) return urlCache.get(id);
+  const b = await getPhoto(id);
+  if (!b) return null;
+  const u = URL.createObjectURL(b); urlCache.set(id, u); return u;
+}
+/* fill every <img data-foto="id"> currently in the DOM */
+function hydratePhotos(root = document) {
+  root.querySelectorAll("img[data-foto]:not([src])").forEach(async img => {
+    const u = await photoURL(img.dataset.foto);
+    if (u) img.src = u; else img.closest("button, .t")?.setAttribute("data-missing", "");
+  });
+}
+async function downscale(file, max = 1600) {
+  let bmp;
+  try { bmp = await createImageBitmap(file); }
+  catch (e) {
+    bmp = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+  }
+  const w = bmp.width, h = bmp.height, k = Math.min(1, max / Math.max(w, h));
+  const c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  return await new Promise(res => c.toBlob(b => res(b || file), "image/jpeg", 0.85));
+}
+
+/* ---------- EXIF: capture date and GPS from JPEG photos ---------- */
+async function readExif(file) {
+  try {
+    const buf = await file.slice(0, 256 * 1024).arrayBuffer();
+    const v = new DataView(buf);
+    if (v.getUint16(0) !== 0xFFD8) return null;
+    let o = 2;
+    while (o + 4 < v.byteLength) {
+      const marker = v.getUint16(o), len = v.getUint16(o + 2);
+      if (marker === 0xFFE1 && v.getUint32(o + 4) === 0x45786966) return parseTiff(v, o + 10);
+      if ((marker & 0xFF00) !== 0xFF00) break;
+      o += 2 + len;
+    }
+  } catch (e) {}
+  return null;
+}
+function parseTiff(v, t) {
+  const le = v.getUint16(t) === 0x4949;
+  const u16 = o => v.getUint16(o, le), u32 = o => v.getUint32(o, le);
+  const ifd = off => { const out = {}; const n = u16(t + off); for (let i = 0; i < n; i++) { const e = t + off + 2 + i * 12; out[u16(e)] = { type: u16(e + 2), count: u32(e + 4), at: e + 8 }; } return out; };
+  const str = e => { const p = e.count > 4 ? t + u32(e.at) : e.at; let s = ""; for (let i = 0; i < e.count - 1; i++) s += String.fromCharCode(v.getUint8(p + i)); return s; };
+  const rats = e => { const p = t + u32(e.at); return [0, 1, 2].map(i => u32(p + i * 8) / (u32(p + i * 8 + 4) || 1)); };
+  const res = {};
+  const i0 = ifd(u32(t + 4));
+  if (i0[0x8769]) { const ex = ifd(u32(i0[0x8769].at)); const d = ex[0x9003] || ex[0x9004]; if (d) { const m = str(d).match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/); if (m) res.ts = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]).getTime(); } }
+  if (!res.ts && i0[0x0132]) { const m = str(i0[0x0132]).match(/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/); if (m) res.ts = new Date(+m[1], m[2] - 1, +m[3], +m[4], +m[5]).getTime(); }
+  if (i0[0x8825]) {
+    const g = ifd(u32(i0[0x8825].at));
+    if (g[2] && g[4]) {
+      const dms = a => a[0] + a[1] / 60 + a[2] / 3600;
+      let lat = dms(rats(g[2])), lon = dms(rats(g[4]));
+      if (g[1] && String.fromCharCode(v.getUint8(g[1].at)) === "S") lat = -lat;
+      if (g[3] && String.fromCharCode(v.getUint8(g[3].at)) === "W") lon = -lon;
+      if (isFinite(lat) && isFinite(lon) && (lat || lon)) { res.lat = lat; res.lon = lon; }
+    }
+  }
+  return res;
+}
+
+/* ---------- Helpers ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtDate = ts => new Date(ts).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
+const fmtTime = ts => new Date(ts).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+const fmtCoords = (lat, lon) => lat == null ? "" : `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lon).toFixed(4)}° ${lon >= 0 ? "O" : "W"}`;
+const pad = n => String(n).padStart(2, "0");
+const toLocalInput = ts => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
+const rlBadge = (s, long) => `<span class="rl" data-rl="${esc(s.rl)}" title="Rote Liste: ${esc(RL_TEXT[s.rl])}">RL ${esc(s.rl === "nb" ? "nb" : s.rl || "–")}${long ? " · " + esc(RL_TEXT[s.rl]) : ""}</span>`;
+const avatar = (s, seen) => `<span class="avatar">${esc(s.name[0])}${PHOTOS ? `<img src="img/${s.id}.jpg" alt="" loading="lazy" onerror="this.remove()">` : ""}${seen ? `<span class="tick">${CHECK}</span>` : ""}</span>`;
+
+/* ---------- Silhouettes (one example animal per order, viewBox 120×80, ground at y=76) ---------- */
+function hedgehogSpikes() {
+  const pts = [], cx = 54, cy = 64, rx = 34, ry = 28, n = 26;
+  for (let i = 0; i <= n; i++) { const a = Math.PI + Math.PI * i / n, r = i % 2 ? 1.2 : 1; pts.push(`${(cx + Math.cos(a) * rx * r).toFixed(1)},${(cy + Math.sin(a) * ry * r).toFixed(1)}`); }
+  return `<polygon points="${pts.join(" ")}"/>`;
+}
+const SIL = {
+  erinaceomorpha: hedgehogSpikes() +
+    `<ellipse cx="54" cy="64" rx="34" ry="10"/><ellipse cx="88" cy="62" rx="14" ry="9"/><polygon points="96,56 108,63 96,68"/><circle cx="108" cy="63" r="2.5"/>
+     <rect x="34" y="66" width="6" height="10" rx="2"/><rect x="74" y="66" width="6" height="10" rx="2"/>`,
+  soricomorpha:
+    `<ellipse cx="54" cy="56" rx="27" ry="15"/><ellipse cx="80" cy="54" rx="13" ry="10"/><polygon points="86,48 108,58 86,62"/><circle cx="78" cy="45" r="4.5"/>
+     <polygon points="30,54 6,64 6,67 30,61"/><rect x="40" y="64" width="5" height="12" rx="2"/><rect x="68" y="62" width="5" height="14" rx="2"/>`,
+  chiroptera:
+    `<ellipse cx="60" cy="44" rx="8" ry="15"/><circle cx="60" cy="27" r="7"/><polygon points="54,24 52,12 59,21"/><polygon points="66,24 68,12 61,21"/>
+     <polygon points="58,36 40,24 14,28 4,48 16,45 22,56 31,49 39,60 47,51 56,55"/>
+     <polygon points="62,36 80,24 106,28 116,48 104,45 98,56 89,49 81,60 73,51 64,55"/>`,
+  lagomorpha:
+    `<ellipse cx="52" cy="52" rx="27" ry="16" transform="rotate(-10 52 52)"/><ellipse cx="35" cy="58" rx="16" ry="15"/>
+     <rect x="20" y="70" width="36" height="7" rx="3.5"/><path d="M66 44 C72 50 74 60 72 76 L66 76 C66 64 62 56 60 50 Z"/>
+     <path d="M70 40 C74 30 84 28 92 33 C98 36 99 42 94 45 C88 49 78 50 72 48 Z"/>
+     <ellipse cx="68" cy="20" rx="4.2" ry="17" transform="rotate(-38 68 20)"/><ellipse cx="75" cy="19" rx="4.2" ry="17" transform="rotate(-24 75 19)"/>
+     <circle cx="20" cy="49" r="5"/>`,
+  rodentia:
+    `<path d="M58 70 C34 74 18 60 22 42 C25 30 34 26 34 16 C34 8 44 4 52 8 C60 12 58 22 52 26 C46 30 44 38 48 46 C52 54 60 58 62 62 Z"/>
+     <ellipse cx="68" cy="52" rx="12" ry="17" transform="rotate(14 68 52)"/><ellipse cx="64" cy="66" rx="13" ry="9"/><ellipse cx="72" cy="74" rx="10" ry="3"/>
+     <circle cx="77" cy="32" r="9"/><ellipse cx="85" cy="35" rx="6" ry="4.5"/><path d="M71 26 L70 13 L78 24 Z"/>
+     <path d="M76 44 C82 44 86 48 84 52 C82 55 77 54 74 51 Z"/>`,
+  carnivora:
+    `<ellipse cx="56" cy="44" rx="27" ry="12"/>
+     <path d="M72 36 C78 32 84 30 88 28 L108 36 L94 42 C88 46 82 48 76 48 Z"/><polygon points="84,30 87,15 93,28"/>
+     <ellipse cx="22" cy="52" rx="17" ry="7" transform="rotate(28 22 52)"/>
+     <rect x="34" y="48" width="5" height="28" rx="2"/><rect x="44" y="48" width="5" height="28" rx="2"/>
+     <rect x="70" y="46" width="5" height="30" rx="2"/><rect x="78" y="44" width="5" height="32" rx="2"/>`,
+  ungulata:
+    `<ellipse cx="52" cy="40" rx="24" ry="11"/><polygon points="68,34 80,14 88,17 78,42"/><ellipse cx="89" cy="19" rx="10" ry="5" transform="rotate(22 89 19)"/>
+     <ellipse cx="80" cy="12" rx="5" ry="2.5" transform="rotate(-30 80 12)"/>
+     <rect x="83" y="0" width="2.5" height="14" transform="rotate(-12 84 7)"/><rect x="78" y="3" width="2.5" height="8" transform="rotate(-50 79 7)"/>
+     <rect x="88" y="2" width="2.5" height="7" transform="rotate(30 89 5)"/>
+     <rect x="33" y="44" width="4" height="32" rx="2"/><rect x="41" y="45" width="4" height="31" rx="2"/>
+     <rect x="62" y="44" width="4" height="32" rx="2"/><rect x="69" y="43" width="4" height="33" rx="2"/><ellipse cx="29" cy="35" rx="4" ry="3"/>`,
+  cetacea:
+    `<ellipse cx="66" cy="48" rx="40" ry="15"/><ellipse cx="98" cy="51" rx="11" ry="10"/><polygon points="34,40 12,40 12,44 34,56"/>
+     <ellipse cx="11" cy="41" rx="11" ry="3.5" transform="rotate(-8 11 41)"/><polygon points="66,57 56,70 76,59"/><polygon points="56,35 64,27 68,35"/>`,
+};
+const SIL_BOUNDS = { erinaceomorpha: [29, 76], soricomorpha: [40, 76], chiroptera: [11, 61], lagomorpha: [4, 77], rodentia: [5, 77], carnivora: [15, 76], ungulata: [0, 76], cetacea: [27, 71] };
+let silN = 0;
+function silhouette(gid, frac) {
+  const shapes = SIL[gid], H = 80, ground = 76, k = "m" + (silN++);
+  const [top, bottom] = SIL_BOUNDS[gid];
+  const y = frac <= 0 ? H : bottom - (bottom - top) * Math.min(1, frac);
+  return `<svg viewBox="0 0 120 80" aria-hidden="true">
+    <defs><mask id="${k}" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="80"><g fill="#fff">${shapes}</g></mask></defs>
+    <line class="sil-ground" x1="2" x2="118" y1="${ground + 2}" y2="${ground + 2}"/>
+    <g class="sil-line">${shapes}</g><g class="sil-empty">${shapes}</g>
+    <rect class="sil-fill" x="0" y="${y.toFixed(1)}" width="120" height="${H}" mask="url(#${k})"/>
+  </svg>`;
+}
+
+
+/* ---------- Order colors ---------- */
+const oc = gid => `var(--c-${gid})`;
+const firstSightingIds = () => {
+  const first = {};
+  state.sightings.slice().sort((a, b) => a.ts - b.ts).forEach(s => { if (!first[s.artId]) first[s.artId] = s.id; });
+  return new Set(Object.values(first));
+};
+
+/* ---------- Badges ---------- */
+const COAST = new Set(["seehund", "atlantische-kegelrobbe", "baltische-kegelrobbe"]);
+const ICON_CAMERA = '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+const ICON_STAR = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.6 6 6.5.6-4.9 4.3 1.5 6.4L12 16.8 6.3 20.1l1.5-6.4-4.9-4.3 6.5-.6z"/></svg>';
+const ICON_SPARK = '<svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+function stats() {
+  const m = byArt();
+  const seenObs = ALL.filter(s => !s.ex && m[s.id]);
+  return {
+    m, seen: seenObs.length,
+    bonus: ALL.filter(s => s.ex && m[s.id]).length,
+    perGroup: Object.fromEntries(GROUPS.map(g => [g.id, g.arten.filter(s => !s.ex && m[s.id]).length])),
+    redlist: ALL.filter(s => m[s.id] && (s.rl === "1" || s.rl === "2")).length,
+    coast: ALL.filter(s => m[s.id] && (s.gid === "cetacea" || COAST.has(s.id))).length,
+    withPhoto: state.sightings.filter(s => (s.fotos || []).length).length,
+  };
+}
+const BADGES = [
+  { id: "first", name: "Erste Sichtung", desc: "Trag deine erste Art ein", glyph: ICON_STAR, goal: 1, val: st => st.seen + st.bonus },
+  ...[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((n, i) => ({ id: "n" + n, name: n + " Arten", desc: n + " Arten gesehen", glyph: String(n), goal: n, val: st => st.seen,
+    color: ["#2a6f97", "#2a8a7c", "#4b8a2c", "#8a8a1e", "#b07a12", "#d0612a", "#c73e4a", "#a2457f", "#6b4fb3", "#3d4db0"][i] })),
+  { id: "n106", name: "Komplett", desc: "Alle 106 beobachtbaren Arten", glyph: "106", goal: 106, val: st => st.seen, color: "#121a16" },
+  ...["erinaceomorpha", "soricomorpha", "chiroptera", "lagomorpha", "rodentia", "carnivora", "ungulata", "cetacea"].map(gid => {
+    const g = () => GROUPS.find(x => x.id === gid);
+    return { id: "o-" + gid, name: "Alle " + GROUP_NAMES[gid], desc: "Jede beobachtbare Art der " + GROUP_NAMES[gid], sil: gid, color: oc(gid),
+      get goal() { return g().arten.filter(s => !s.ex).length; }, val: st => st.perGroup[gid] };
+  }),
+  { id: "bats5", name: "Nachtschwärmer", desc: "5 Fledermausarten gesehen", sil: "chiroptera", goal: 5, val: st => st.perGroup.chiroptera, color: "#232a5c" },
+  { id: "coast", name: "Küstenspäher", desc: "Einen Wal oder eine Robbe gesehen", sil: "cetacea", goal: 1, val: st => st.coast, color: "#0f5d8c" },
+  { id: "redlist", name: "Spürnase", desc: "Eine Art der Roten Liste 1 oder 2 gesehen", glyph: "RL", small: true, goal: 1, val: st => st.redlist, color: "var(--rl-1)" },
+  { id: "bonus", name: "Zeitreise", desc: "Eine in Deutschland ausgestorbene oder verschollene Art eingetragen", glyph: ICON_SPARK, goal: 1, val: st => st.bonus, color: "var(--ex)" },
+  { id: "foto10", name: "Fotograf", desc: "10 Sichtungen mit eigenem Foto", glyph: ICON_CAMERA, goal: 10, val: st => st.withPhoto, color: "#3b4a43" },
+];
+function badgeState(st = stats()) {
+  return BADGES.map(b => { const v = Math.min(b.goal, b.val(st) || 0); return { ...b, goalN: b.goal, v, done: v >= b.goal }; });
+}
+function medal(b) {
+  const inner = b.sil ? silhouette(b.sil, 1).replace("<svg ", '<svg class="sil" ') : (b.glyph.startsWith("<svg") ? b.glyph : `<span class="g ${b.small || b.glyph.length > 2 ? "sm" : ""}">${b.glyph}</span>`);
+  return `<span class="medal" style="--bc:${b.color || "var(--accent)"}">${inner}</span>`;
+}
+function badgeHTML(b, withDesc) {
+  return `<div class="badge ${b.done ? "" : "locked"}" style="--bc:${b.color || "var(--accent)"}">
+    ${medal(b)}<span class="bn">${esc(b.name)}</span>
+    ${b.done ? "" : `<span class="bar"><i style="width:${b.v / b.goalN * 100}%"></i></span><span class="bp num">${b.v} / ${b.goalN}</span>`}
+    ${withDesc ? `<span class="bd">${esc(b.desc)}</span>` : ""}
+  </div>`;
+}
+
+/* ---------- Ring: one arc per order, sized by its observable species ---------- */
+function ring(st) {
+  const r = 60, C = 2 * Math.PI * r, gap = 3;
+  let off = 0;
+  const arcs = GROUPS.map(g => {
+    const obs = g.arten.filter(s => !s.ex).length, len = C * obs / OBSERVABLE, seg = Math.max(0, len - gap);
+    const fill = seg * (st.perGroup[g.id] / obs);
+    const a = `<circle cx="74" cy="74" r="${r}" fill="none" stroke="${oc(g.id)}" stroke-opacity=".32" stroke-width="16" stroke-dasharray="${seg.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"/>
+      ${fill > 0 ? `<circle cx="74" cy="74" r="${r}" fill="none" stroke="${oc(g.id)}" stroke-width="16" stroke-dasharray="${fill.toFixed(2)} ${C.toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}"/>` : ""}`;
+    off += len;
+    return a;
+  }).join("");
+  return `<div class="ring"><svg viewBox="0 0 148 148" aria-hidden="true">${arcs}</svg>
+    <div class="mid"><div class="big num">${st.seen}</div><div class="of num">von ${OBSERVABLE}</div></div></div>`;
+}
+
+/* ---------- Views ---------- */
+let tab = "overview", filter = "alle", query = "", order = "alle", orderScroll = 0;
+const view = document.getElementById("view");
+
+function bannerHTML() {
+  return state.sightings.some(s => s.beispiel)
+    ? `<div class="banner"><span>Die markierten Einträge sind Beispieldaten, damit du siehst, wie die App gefüllt aussieht.</span><button type="button" id="clearEx">Entfernen</button></div>` : "";
+}
+const speciesImg = (s, cls = "") => PHOTOS ? `<img class="${cls}" src="img/${s.id}.jpg" alt="" loading="lazy" onerror="this.remove()">` : "";
+
+function renderOverview() {
+  const st = stats(), m = st.m;
+  const pct = Math.round(st.seen / OBSERVABLE * 100);
+  const bs = badgeState(st);
+  const earned = bs.filter(b => b.done);
+  const next = bs.filter(b => !b.done).sort((a, b) => (b.v / b.goalN) - (a.v / a.goalN));
+  const shelf = [...earned, ...next].slice(0, 10);
+  const recent = state.sightings.slice().sort((a, b) => b.ts - a.ts).slice(0, 8);
+  view.innerHTML = `
+    ${bannerHTML()}
+    <div class="hero">
+      ${ring(st)}
+      <div><h1>Arten gesehen</h1><div class="pct num">${pct}<small>%</small></div><div style="color:var(--hero-muted);font-size:13px;margin-top:6px">${OBSERVABLE - st.seen} Arten warten noch auf dich</div></div>
+      <div class="stats">
+        <div class="stat"><b class="num">${state.sightings.length}</b><span>Sichtungen</span></div>
+        <div class="stat ex"><b class="num">+${st.bonus}</b><span>Bonusarten</span></div>
+        <div class="stat"><b class="num">${earned.length}<small style="font-size:14px;opacity:.6">/${BADGES.length}</small></b><span>Abzeichen</span></div>
+      </div>
+    </div>
+
+    <section>
+      <div class="sh"><h2>Abzeichen</h2><button type="button" id="allBadges">Alle ansehen</button></div>
+      <div class="shelf">${shelf.map(b => badgeHTML(b)).join("")}</div>
+    </section>
+
+    <section>
+      <div class="sh"><h2>Ordnungen</h2><small>Tippen zum Filtern</small></div>
+      <div class="ocards">
+        ${GROUPS.map(g => {
+          const obs = g.arten.filter(s => !s.ex), c = st.perGroup[g.id], b = g.arten.filter(s => s.ex && m[s.id]).length;
+          return `<button type="button" class="ocard press" style="--oc:${oc(g.id)}" data-group="${g.id}" aria-label="${g.name}: ${c} von ${obs.length} Arten gesehen">
+            ${c === obs.length ? `<span class="done">Komplett</span>` : ""}
+            ${silhouette(g.id, c / obs.length)}
+            <span class="orow"><span class="oname">${g.name}</span><span class="ocount num">${c}/${obs.length}${b ? ` +${b}` : ""}</span></span>
+            <span class="odots">${g.arten.map(s => `<i class="${s.ex ? "ex" : ""} ${m[s.id] ? "on" : ""}"></i>`).join("")}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    </section>
+
+    <section>
+      <div class="sh"><h2>Zuletzt gesehen</h2>${recent.length ? `<button type="button" data-tab="log">Logbuch</button>` : ""}</div>
+      ${recent.length ? `<div class="recent">${recent.map(s => {
+        const sp = SPECIES[s.artId], f = s.fotos || [], d = new Date(s.ts);
+        return `<button type="button" class="rcard press" style="--oc:${oc(sp.gid)}" data-open="${sp.id}">
+          <div class="rph">${f.length ? `<img data-foto="${f[0]}" alt=""><span class="own">Dein Foto</span>` : speciesImg(sp)}</div>
+          <div class="rb"><strong>${esc(sp.name)}</strong><span>${d.toLocaleDateString("de-DE", { day: "numeric", month: "short" })}${s.beispiel ? " · Beispiel" : ""}</span></div>
+        </button>`; }).join("")}</div>`
+        : `<div class="empty">Noch keine Sichtung. Tippe auf „Sichtung“, wähle eine Art und sammle dein erstes Abzeichen.</div>`}
+    </section>
+    <div class="foot">
+      <span>Artenliste und Gefährdung: Rote Liste der Säugetiere Deutschlands, BfN 2020.</span>
+      <button type="button" id="credits">Bildnachweise für alle Artfotos</button>
+    </div>`;
+  hydratePhotos(view);
+}
+
+function renderSpecies() {
+  const m = byArt();
+  const q = query.trim().toLowerCase();
+  const pass = s => (!q || s.name.toLowerCase().includes(q) || s.wiss.toLowerCase().includes(q)) && (
+    filter === "alle" || (filter === "gesehen" && m[s.id]) || (filter === "offen" && !m[s.id] && !s.ex) ||
+    (filter === "gefaehrdet" && THREATENED.has(s.rl)) || (filter === "ausgestorben" && s.ex));
+  const groupsHTML = GROUPS.filter(g => order === "alle" || g.id === order).map(g => {
+    const obs = g.arten.filter(s => !s.ex), c = obs.filter(s => m[s.id]).length;
+    const list = g.arten.filter(pass);
+    if (!list.length) return "";
+    return `<div class="group" id="g-${g.id}" style="--oc:${oc(g.id)}">
+      <div class="ghead"><span class="gt">${silhouette(g.id, 1)}${g.name}</span><span class="gbar"><i style="width:${c / obs.length * 100}%"></i></span><span class="gc num">${c}/${obs.length}</span></div>
+      <div class="album">
+      ${list.map(s => `<button type="button" class="tile press ${m[s.id] ? "seen" : ""} ${s.ex ? "ex" : ""}" data-open="${s.id}" aria-label="${esc(s.name)}${m[s.id] ? ", gesehen" : ""}">
+        <span class="tp">${PHOTOS ? speciesImg(s) : esc(s.name[0])}${rlBadge(s)}
+          ${m[s.id] ? `<span class="ck">${CHECK}</span>${m[s.id].length > 1 ? `<span class="cnt num">${m[s.id].length}×</span>` : ""}` : ""}</span>
+        <span class="tn">${esc(s.name)}</span>
+      </button>`).join("")}
+      </div></div>`;
+  }).join("");
+  const hadFocus = document.activeElement && document.activeElement.id === "q";
+  view.innerHTML = `
+    <div class="search">
+      <input id="q" type="search" placeholder="Art suchen, z. B. Dachs oder Myotis" value="${esc(query)}" autocomplete="off" aria-label="Art suchen">
+      <div class="hscroll" role="group" aria-label="Filter">
+        ${[["alle", "Alle"], ["gesehen", "Gesehen"], ["offen", "Offen"], ["gefaehrdet", "Gefährdet"], ["ausgestorben", "Ausgestorben"]].map(([k, l]) => `<button type="button" class="chip" data-filter="${k}" aria-pressed="${filter === k}">${l}</button>`).join("")}
+      </div>
+      <div class="hscroll orderbar" role="group" aria-label="Ordnung">
+        <button type="button" class="chip" data-order="alle" aria-pressed="${order === "alle"}">Alle Ordnungen</button>
+        ${GROUPS.map(g => { const obs = g.arten.filter(s => !s.ex); return `<button type="button" class="chip o" style="--oc:${oc(g.id)}" data-order="${g.id}" aria-pressed="${order === g.id}"><span class="sw"></span>${g.name}<span class="n num">${obs.filter(s => m[s.id]).length}/${obs.length}</span></button>`; }).join("")}
+      </div>
+    </div>
+    ${groupsHTML || `<div class="empty" style="margin-top:16px">Keine Art passt zu diesen Filtern${query ? ` und „${esc(query)}“` : ""}.</div>`}`;
+  if (hadFocus) { const i = document.getElementById("q"); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+  const ob = view.querySelector(".orderbar");
+  if (ob) { ob.scrollLeft = orderScroll; const a = ob.querySelector('[aria-pressed="true"]'); if (a && (a.offsetLeft < ob.scrollLeft || a.offsetLeft + a.offsetWidth > ob.scrollLeft + ob.clientWidth)) ob.scrollLeft = a.offsetLeft - 16; }
+}
+
+function entryHTML(s, firsts) {
+  const sp = SPECIES[s.artId], d = new Date(s.ts), f = s.fotos || [];
+  return `<button class="entry press" type="button" style="--oc:${oc(sp.gid)}" data-open="${s.artId}">
+    <div class="eph">${f.length ? `<img data-foto="${f[0]}" alt="">${f.length > 1 ? `<b>${f.length}</b>` : ""}` : speciesImg(sp)}</div>
+    <div class="what"><strong>${esc(sp.name)}${firsts.has(s.id) ? '<span class="tag new">Neu</span>' : ""}${sp.ex ? '<span class="tag ex">Bonus</span>' : ""}${s.beispiel ? '<span class="tag">Beispiel</span>' : ""}</strong>
+      <div class="where">${esc(s.ort || fmtCoords(s.lat, s.lon) || "Ort unbekannt")}</div></div>
+    <div class="day"><b class="num">${d.getDate()}</b><span>${d.toLocaleDateString("de-DE", { month: "short" }).replace(".", "")}</span></div>
+  </button>`;
+}
+function renderLog() {
+  const list = state.sightings.slice().sort((a, b) => b.ts - a.ts);
+  if (!list.length) { view.innerHTML = `<div class="empty" style="margin-top:12px">Dein Logbuch ist leer. Jede Sichtung erscheint hier mit Datum, Ort und Fotos.</div>`; return; }
+  const firsts = firstSightingIds();
+  const months = [];
+  list.forEach(s => {
+    const k = new Date(s.ts).toLocaleDateString("de-DE", { month: "long", year: "numeric" });
+    if (!months.length || months[months.length - 1][0] !== k) months.push([k, []]);
+    months[months.length - 1][1].push(s);
+  });
+  view.innerHTML = bannerHTML() + months.map(([k, items]) => {
+    const neu = items.filter(s => firsts.has(s.id)).length;
+    return `<div class="month"><div class="mhead"><h2>${k}</h2><span class="num">${items.length} ${items.length === 1 ? "Sichtung" : "Sichtungen"}${neu ? ` · ${neu} neue ${neu === 1 ? "Art" : "Arten"}` : ""}</span></div>
+      <div class="entries">${items.map(s => entryHTML(s, firsts)).join("")}</div></div>`;
+  }).join("");
+  hydratePhotos(view);
+}
+
+function render() {
+  document.querySelectorAll("nav.tabs button").forEach(b => { if (b.dataset.tab === tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  document.getElementById("fab").hidden = tab === "species";
+  ({ overview: renderOverview, species: renderSpecies, log: renderLog })[tab]();
+}
+function go(t, opts = {}) {
+  tab = t; render(); window.scrollTo(0, 0);
+  if (opts.focusSearch) setTimeout(() => document.getElementById("q")?.focus(), 30);
+}
+
+/* ---------- Sheets ---------- */
+const sheetRoot = document.getElementById("sheetRoot");
+let lastFocus = null;
+function closeSheet() { sheetRoot.innerHTML = ""; document.body.style.overflow = ""; draft = null; if (lastFocus) lastFocus.focus?.(); }
+function shell(inner, gid) {
+  if (!sheetRoot.innerHTML) lastFocus = document.activeElement;
+  sheetRoot.innerHTML = `<div class="scrim" data-close></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" style="--oc:${gid ? oc(gid) : "var(--accent)"}"><div class="sheet-head"><div class="grab"></div><button type="button" class="sheet-x" data-close aria-label="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>${inner}</div>`;
+  document.body.style.overflow = "hidden";
+}
+function creditLine(s) {
+  const c = s.credit;
+  return `Foto: ${esc(c.urheber || "Urheber siehe Dateiseite")} · <a href="${esc(c.lizenzUrl || c.seite)}" target="_blank" rel="noopener">${esc(c.lizenz)}</a> · <a href="${esc(c.seite)}" target="_blank" rel="noopener">Wikimedia Commons</a>`;
+}
+const thumbsHTML = ids => `<div class="thumbs">${ids.map(f => `<button type="button" data-light="${f}" aria-label="Foto vergrößern"><img data-foto="${f}" alt=""></button>`).join("")}</div>`;
+
+function openSpecies(id) {
+  const sp = SPECIES[id];
+  const list = byArt()[id] || [];
+  const first = list.length ? list[list.length - 1] : null;
+  const fotos = list.flatMap(s => s.fotos || []);
+  shell(`
+    <figure class="photo ${sp.ex ? "ex" : ""}">
+      <div class="frame">${silhouette(sp.gid, 1)}${PHOTOS ? `<img src="img/${sp.id}.jpg" alt="${esc(sp.name)}" onerror="this.remove()">` : ""}
+        ${list.length ? `<span class="stamp">${sp.ex ? "Bonus" : "Gesehen"}</span>` : ""}
+        <span class="ordertag">${esc(sp.gname)}</span></div>
+      <figcaption class="credit">${creditLine(sp)}</figcaption>
+    </figure>
+    <h2 class="t" id="sheetTitle">${esc(sp.name)}</h2>
+    <div class="latin">${esc(sp.wiss)}</div>
+    <div class="facts">
+      <div class="fact"><span class="label">Rote Liste</span><b>${esc(RL_TEXT[sp.rl])}</b>${rlBadge(sp)}</div>
+      <div class="fact"><span class="label">Status</span><b>${esc(STATUS_TEXT[sp.status] || "")}</b></div>
+      <div class="fact"><span class="label">Erstmals gesehen</span><b>${first ? fmtDate(first.ts) : "Noch offen"}</b></div>
+      <div class="fact"><span class="label">Sichtungen</span><b class="num">${list.length}</b></div>
+    </div>
+    ${sp.ex ? `<div class="note-ex">Gilt in Deutschland als ausgestorben oder verschollen. Du kannst eine Sichtung trotzdem eintragen, etwa aus einem Gehege oder von einem zugewanderten Tier. Sie zählt als Bonus außerhalb des Fortschritts.</div>` : ""}
+    <button class="btn primary press" type="button" data-capture="${id}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      ${list.length ? "Weitere Sichtung erfassen" : "Als gesehen eintragen"}
+    </button>
+    ${fotos.length ? `<div class="sheet-list"><div class="label">Deine Fotos (${fotos.length})</div>${thumbsHTML(fotos)}</div>` : ""}
+    ${list.length ? `<div class="sheet-list"><div class="label">${list.length} ${list.length === 1 ? "Sichtung" : "Sichtungen"}</div>
+      ${list.map(s => `<div class="s-item">
+        <div><div class="when">${fmtDate(s.ts)} · ${fmtTime(s.ts)}${s.beispiel ? '<span class="tag">Beispiel</span>' : ""}</div>
+          <div>${esc(s.ort || "Ort nicht benannt")}</div>
+          ${s.lat != null ? `<div class="coords">${fmtCoords(s.lat, s.lon)}</div>` : ""}</div>
+        <button type="button" class="del" data-del="${s.id}">Löschen</button>
+        ${s.notiz ? `<div class="note">${esc(s.notiz)}</div>` : ""}
+        ${(s.fotos || []).length ? thumbsHTML(s.fotos) : ""}
+      </div>`).join("")}</div>` : ""}
+  `, sp.gid);
+  hydratePhotos(sheetRoot);
+  sheetRoot.querySelector(".btn.primary").focus();
+}
+
+/* Capture form with photo upload */
+let draft = null;
+function openForm(id) {
+  const sp = SPECIES[id];
+  draft = { artId: id, fotos: [], lat: null, lon: null, exifUsed: false };
+  shell(`
+    <div class="label">Neue Sichtung</div>
+    <div class="mini">${PHOTOS ? `<img src="img/${sp.id}.jpg" alt="" onerror="this.remove()">` : `<span class="ph"></span>`}
+      <div><h2 class="t" id="sheetTitle">${esc(sp.name)}</h2><div class="latin" style="font-size:15px">${esc(sp.wiss)}</div></div></div>
+    <form id="capture">
+      <label class="pick press" for="f-fotos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        Fotos hinzufügen
+        <input id="f-fotos" type="file" accept="image/*" multiple>
+      </label>
+      <div class="thumbs" id="draftThumbs" hidden></div>
+      <label for="f-when">Datum und Uhrzeit
+        <input id="f-when" type="datetime-local" value="${toLocalInput(Date.now())}" required></label>
+      <div class="gps warn" id="gpsBox"><strong>Ort ohne GPS</strong><span>Lädst du ein Handyfoto mit Standortdaten hoch, übernimmt die App Ort und Aufnahmezeit daraus. In der fertigen App kommt der Ort sonst direkt vom GPS.</span></div>
+      <label for="f-ort">Ortsname
+        <input id="f-ort" type="text" placeholder="z. B. Müritz-Nationalpark" autocomplete="off"></label>
+      <label for="f-note">Notiz <span class="hint">optional</span>
+        <textarea id="f-note" placeholder="Anzahl, Verhalten, Wetter …"></textarea></label>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" data-back="${id}">Zurück</button>
+        <button type="submit" class="btn primary press" id="saveBtn">Speichern</button>
+      </div>
+    </form>`, sp.gid);
+  locateDevice();
+}
+function renderDraftThumbs() {
+  const box = document.getElementById("draftThumbs"); if (!box) return;
+  box.hidden = !draft.fotos.length;
+  box.innerHTML = draft.fotos.map((f, i) => `<div class="t"><img src="${f.url}" alt=""><button type="button" class="x" data-rmfoto="${i}" aria-label="Foto entfernen">×</button></div>`).join("");
+}
+function setGps(lat, lon, source = "foto", acc) {
+  if (!draft) return;
+  draft.lat = lat; draft.lon = lon; draft.gpsSource = source;
+  const b = document.getElementById("gpsBox"); if (!b) return;
+  b.classList.remove("warn");
+  b.innerHTML = `<strong>${source === "foto" ? "Ort aus Foto übernommen" : "Aktueller Standort erfasst"}</strong><span class="coordline">${fmtCoords(lat, lon)}${acc ? ` · ±${Math.round(acc)} m` : ""}</span>`;
+}
+/* Device GPS: works on a normal https page; inside a sandboxed preview it is refused and the hint stays */
+function locateDevice() {
+  const box = () => document.getElementById("gpsBox");
+  const fail = () => {
+    const b = box(); if (!b || !draft || draft.gpsSource) return;
+    b.classList.add("warn");
+    b.innerHTML = `<strong>Kein Standort verfügbar</strong><span>Erlaube den Standortzugriff, lade ein Foto mit Ortsdaten hoch oder trag den Ort unten von Hand ein.</span>`;
+  };
+  try {
+    if (!navigator.geolocation) return fail();
+    const b = box(); if (b) b.innerHTML = `<strong>Standort wird ermittelt …</strong><span>Dein Browser fragt eventuell nach der Erlaubnis.</span>`;
+    const d = draft, timer = setTimeout(fail, 10000);
+    navigator.geolocation.getCurrentPosition(p => {
+      clearTimeout(timer);
+      if (draft !== d || d.gpsSource === "foto") return;
+      setGps(p.coords.latitude, p.coords.longitude, "geraet", p.coords.accuracy);
+    }, () => { clearTimeout(timer); fail(); }, { enableHighAccuracy: true, timeout: 9000, maximumAge: 60000 });
+  } catch (e) { fail(); }
+}
+async function addFiles(files) {
+  const btn = document.getElementById("saveBtn");
+  if (btn) { btn.disabled = true; btn.textContent = "Verarbeite …"; }
+  for (const file of files) {
+    try {
+      const ex = await readExif(file);
+      const blob = await downscale(file);
+      draft.fotos.push({ id: newId("f"), blob, url: URL.createObjectURL(blob) });
+      if (ex && !draft.exifUsed && (ex.ts || ex.lat != null)) {
+        draft.exifUsed = true;
+        if (ex.ts) document.getElementById("f-when").value = toLocalInput(ex.ts);
+        if (ex.lat != null) setGps(ex.lat, ex.lon, "foto");
+        toast(ex.lat != null ? "Aufnahmezeit und Ort aus dem Foto übernommen" : "Aufnahmezeit aus dem Foto übernommen");
+      }
+    } catch (e) { toast("Ein Foto ließ sich nicht lesen. Bitte JPEG oder PNG verwenden."); }
+  }
+  renderDraftThumbs();
+  if (btn) { btn.disabled = false; btn.textContent = "Speichern"; }
+}
+
+function openCredits() {
+  shell(`<div class="label">Bildnachweise</div><h2 class="t" id="sheetTitle">Artfotos</h2>
+    <p class="hint" style="margin:8px 0 0">Alle Fotos stammen von Wikimedia Commons und stehen unter freien Lizenzen. Ein Tipp auf die Lizenz öffnet ihren Text.</p>
+    <div class="credits">${ALL.map(s => `<div><b>${esc(s.name)}</b> · ${creditLine(s)}</div>`).join("")}</div>`);
+}
+function openBadges() {
+  const bs = badgeState();
+  const done = bs.filter(b => b.done).length;
+  shell(`<div class="label">Abzeichen</div><h2 class="t" id="sheetTitle">${done} von ${bs.length} gesammelt</h2>
+    <div class="badgegrid">${bs.map(b => badgeHTML(b, true)).join("")}</div>`);
+}
+function openLight(fid) {
+  const r = document.getElementById("lightRoot");
+  r.innerHTML = `<div class="lightbox" role="dialog" aria-label="Foto"><img data-foto="${fid}" alt="Dein Foto"><button type="button" data-unlight>Schließen</button></div>`;
+  hydratePhotos(r);
+  r.querySelector("button").focus();
+}
+function toast(msg) {
+  const r = document.getElementById("toastRoot");
+  r.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`;
+  clearTimeout(toast.t); toast.t = setTimeout(() => r.innerHTML = "", 2600);
+}
+
+/* ---------- Celebration for a new species or badge ---------- */
+const reduceMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
+function confetti() {
+  if (reduceMotion()) return;
+  const c = document.createElement("canvas"); c.className = "confetti"; document.body.appendChild(c);
+  const dpr = Math.min(2, devicePixelRatio || 1), W = innerWidth, H = innerHeight;
+  c.width = W * dpr; c.height = H * dpr;
+  const x = c.getContext("2d"); x.scale(dpr, dpr);
+  const cs = getComputedStyle(document.documentElement);
+  const cols = GROUPS.map(g => cs.getPropertyValue("--c-" + g.id).trim() || "#17924f");
+  const P = Array.from({ length: 140 }, () => ({ x: W / 2 + (Math.random() - .5) * 60, y: H * .42, vx: (Math.random() - .5) * 13, vy: -Math.random() * 13 - 4, r: Math.random() * 6.2, w: 5 + Math.random() * 6, h: 3 + Math.random() * 5, s: (Math.random() - .5) * .3, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const t0 = performance.now();
+  (function f(t) {
+    const k = (t - t0) / 1800;
+    x.clearRect(0, 0, W, H);
+    P.forEach(p => { p.vy += .38; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.s; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.globalAlpha = Math.max(0, 1 - k * k); x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); x.restore(); });
+    if (k < 1) requestAnimationFrame(f); else c.remove();
+  })(t0);
+}
+function celebrate(sp, isNew, unlocked, st) {
+  if (!isNew && !unlocked.length) return;
+  const r = document.getElementById("celeRoot");
+  const kick = isNew ? (sp.ex ? "Bonusart entdeckt" : "Neue Art") : "Abzeichen freigeschaltet";
+  r.innerHTML = `<div class="cele" data-uncele><div class="card" role="dialog" aria-label="${kick}" style="--oc:${sp.ex ? "var(--ex)" : oc(sp.gid)}">
+    <div class="kick">${kick}</div>
+    <div class="cimg">${PHOTOS ? `<img src="img/${sp.id}.jpg" alt="" onerror="this.remove()">` : ""}</div>
+    <h3>${esc(sp.name)}</h3>
+    <div class="count num">${sp.ex ? `+${st.bonus} Bonus` : `${st.seen} von ${OBSERVABLE} Arten`}</div>
+    ${unlocked.map(b => `<div class="unl">${medal(b)}<div><b>${esc(b.name)}</b><span>${esc(b.desc)}</span></div></div>`).join("")}
+    <button type="button" class="btn primary press" data-uncele>Weiter</button>
+  </div></div>`;
+  r.querySelector("button").focus();
+  confetti();
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-tab],[data-open],[data-capture],[data-back],[data-close],[data-del],[data-filter],[data-order],[data-group],[data-light],[data-unlight],[data-rmfoto],[data-uncele],#fab,#clearEx,#credits,#allBadges");
+  if (!t) return;
+  if (t.hasAttribute("data-uncele")) { if (t.classList.contains("cele") && e.target !== t) return; document.getElementById("celeRoot").innerHTML = ""; return; }
+  if (t.hasAttribute("data-unlight")) { document.getElementById("lightRoot").innerHTML = ""; return; }
+  if (t.dataset.light) return openLight(t.dataset.light);
+  if (t.dataset.rmfoto) { const f = draft.fotos.splice(+t.dataset.rmfoto, 1)[0]; if (f) URL.revokeObjectURL(f.url); return renderDraftThumbs(); }
+  if (t.dataset.tab) return go(t.dataset.tab);
+  if (t.id === "fab") return go("species", { focusSearch: true });
+  if (t.id === "credits") return openCredits();
+  if (t.id === "allBadges") return openBadges();
+  if (t.id === "clearEx") { state.sightings = state.sightings.filter(s => !s.beispiel); save(); render(); return toast("Beispieldaten entfernt"); }
+  if (t.dataset.filter) { filter = t.dataset.filter; return render(); }
+  if (t.dataset.order) { orderScroll = t.closest(".orderbar")?.scrollLeft || 0; order = t.dataset.order; render(); return window.scrollTo(0, 0); }
+  if (t.dataset.group) { order = t.dataset.group; filter = "alle"; query = ""; orderScroll = 0; return go("species"); }
+  if (t.dataset.open) return openSpecies(t.dataset.open);
+  if (t.dataset.capture) return openForm(t.dataset.capture);
+  if (t.dataset.back) return openSpecies(t.dataset.back);
+  if (t.hasAttribute("data-close")) return closeSheet();
+  if (t.dataset.del) {
+    if (!t.classList.contains("armed")) {
+      t.classList.add("armed"); t.textContent = "Wirklich löschen?";
+      setTimeout(() => { if (t.isConnected) { t.classList.remove("armed"); t.textContent = "Löschen"; } }, 3000);
+      return;
+    }
+    const s = state.sightings.find(x => x.id === t.dataset.del);
+    state.sightings = state.sightings.filter(x => x.id !== t.dataset.del);
+    save(); (s?.fotos || []).forEach(delPhoto); render();
+    if (s) openSpecies(s.artId);
+    return toast("Sichtung gelöscht");
+  }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.id === "f-fotos" && e.target.files?.length) { const files = [...e.target.files]; e.target.value = ""; addFiles(files); }
+});
+
+document.addEventListener("submit", async e => {
+  if (e.target.id !== "capture") return;
+  e.preventDefault();
+  const d = draft; if (!d) return;
+  const when = document.getElementById("f-when").value;
+  const isNew = !byArt()[d.artId];
+  const before = new Set(badgeState().filter(b => b.done).map(b => b.id));
+  for (const f of d.fotos) await putPhoto(f.id, f.blob);
+  d.fotos.forEach(f => urlCache.set(f.id, f.url));
+  state.sightings.push({
+    id: newId("s"), artId: d.artId, ts: when ? new Date(when).getTime() : Date.now(),
+    lat: d.lat, lon: d.lon,
+    ort: document.getElementById("f-ort").value.trim(),
+    notiz: document.getElementById("f-note").value.trim(),
+    fotos: d.fotos.map(f => f.id),
+  });
+  draft = null;
+  save(); render(); openSpecies(d.artId);
+  const st = stats();
+  const unlocked = badgeState(st).filter(b => b.done && !before.has(b.id));
+  if (isNew || unlocked.length) celebrate(SPECIES[d.artId], isNew, unlocked, st);
+  else toast("Sichtung gespeichert");
+});
+
+document.addEventListener("input", e => { if (e.target.id === "q") { query = e.target.value; renderSpecies(); } });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const cr = document.getElementById("celeRoot"), lr = document.getElementById("lightRoot");
+  if (cr.innerHTML) cr.innerHTML = ""; else if (lr.innerHTML) lr.innerHTML = ""; else if (sheetRoot.innerHTML) closeSheet();
+});
+
+load();
+render();
+</script>
+
+</body>
+</html>
